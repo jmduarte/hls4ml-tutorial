@@ -1,13 +1,13 @@
 # Script
 
 # Set accelerator
-set accname jet_tagger_axi
+set accname anomaly_detector_axi
 
 # Set directory
-set proj_dir "./jet_tagger_project"
+set proj_dir "./anomaly_detector_project"
 
 # Set project
-set proj "jet_tagger_project"
+set proj "anomaly_detector_project"
 
 # Set board
 set board "pynqz2"
@@ -19,11 +19,11 @@ create_project $proj $proj_dir -part xc7z020clg400-1
 set_property board_part tul.com.tw:pynq-z2:part0:1.0 [current_project]
 
 # Set IP repository paths
-set_property ip_repo_paths ../../hls/$board\_m_axi_16_serial_prj/jet_tagger_prj [current_project]
+set_property ip_repo_paths ../../hls/$board\_m_axi_8_serial_prj/anomaly_detector_prj [current_project]
 update_ip_catalog -rebuild
 
 # Create the design block
-set design_name jet_tagger_design
+set design_name anomaly_detector_design
 create_bd_design $design_name
 
 # Name of the processing system (PS)
@@ -97,10 +97,10 @@ apply_bd_automation -rule xilinx.com:bd_rule:clkrst -config \
 
 # Assign the address in memory for the accelerator execution
 assign_bd_address
-delete_bd_objs [get_bd_addr_segs -excluded jet_tagger_axi/Data_m_axi_IN_BUS/SEG_zynq_ps_GP0_IOP]
-delete_bd_objs [get_bd_addr_segs -excluded jet_tagger_axi/Data_m_axi_IN_BUS/SEG_zynq_ps_GP0_M_AXI_GP0]
-delete_bd_objs [get_bd_addr_segs -excluded jet_tagger_axi/Data_m_axi_OUT_BUS/SEG_zynq_ps_GP0_IOP]
-delete_bd_objs [get_bd_addr_segs -excluded jet_tagger_axi/Data_m_axi_OUT_BUS/SEG_zynq_ps_GP0_M_AXI_GP0]
+delete_bd_objs [get_bd_addr_segs -excluded $accname/Data_m_axi_IN_BUS/SEG_zynq_ps_GP0_IOP]
+delete_bd_objs [get_bd_addr_segs -excluded $accname/Data_m_axi_IN_BUS/SEG_zynq_ps_GP0_M_AXI_GP0]
+delete_bd_objs [get_bd_addr_segs -excluded $accname/Data_m_axi_OUT_BUS/SEG_zynq_ps_GP0_IOP]
+delete_bd_objs [get_bd_addr_segs -excluded $accname/Data_m_axi_OUT_BUS/SEG_zynq_ps_GP0_M_AXI_GP0]
 
 # Validate the design block we created
 validate_bd_design
@@ -128,5 +128,5 @@ if {[get_property PROGRESS [get_runs impl_1]] != "100%"} {
 # Export the bitstream and the hardware for the SDK
 puts "INFO: Export hardware..."
 file copy -force $proj_dir/$proj.runs/impl_1/$design_name\_wrapper.sysdef \
-    ../../sdk/$board/hdf/$design_name\_m_axi_32_serial_wrapper.hdf
+    ../../sdk/$board/hdf/$design_name\_m_axi_8_serial_wrapper.hdf
 
