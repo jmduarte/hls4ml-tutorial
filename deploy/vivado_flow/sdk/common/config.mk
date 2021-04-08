@@ -1,4 +1,4 @@
-PROJECT_HLS=$(BOARD)_m_axi_16_serial_prj
+PROJECT_HLS=$(BOARD)_m_axi_8_serial_prj
 
 PROJECT = $(TOP)_standalone
 PROJECT_I2C = i2c_test
@@ -8,28 +8,28 @@ help:
 .PHONY: help
 
 setup:
-	xsct script.tcl
+	xsct script.tcl $(TOP)
 .PHONY: setup
 
 sdk: setup data
 	rm -f $(PROJECT)/src/helloworld.c
-	cd  $(PROJECT)/src && ln -s ../../../common/main.c
+	cd  $(PROJECT)/src && ln -s ../../../common/$(TOP)/main.c
 	#rm -f $(PROJECT_I2C)/src/helloworld.c
 	#cd  $(PROJECT_I2C)/src && ln -s ../../../main_i2c_test.c
 .PHONY: sdk
 
-sdk-irq: setup data
-	rm -f $(PROJECT)/src/helloworld.c
-	cd  $(PROJECT)/src && ln -s ../../../common/main_irq.c main.c
-	#rm -f $(PROJECT_I2C)/src/helloworld.c
-	#cd  $(PROJECT_I2C)/src && ln -s ../../../main_i2c_test.c
-.PHONY: sdk-irq
+#sdk-irq: setup data
+#	rm -f $(PROJECT)/src/helloworld.c
+#	cd  $(PROJECT)/src && ln -s ../../../common/main_irq.c main.c
+#	#rm -f $(PROJECT_I2C)/src/helloworld.c
+#	#cd  $(PROJECT_I2C)/src && ln -s ../../../main_i2c_test.c
+#.PHONY: sdk-irq
 
 gui:
 	xsdk --workspace .
 .PHONY: gui
 
-SAMPLE_COUNT=64
+SAMPLE_COUNT=10
 #SAMPLE_COUNT=166000
 
 data:

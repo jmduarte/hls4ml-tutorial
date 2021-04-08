@@ -1,4 +1,4 @@
 BOARD = pynqz1
-TOP = jet_tagger
+TOP = anomaly_detector
 
 include ../common/config.mk

@@ -11,7 +11,6 @@ clean:
 	@rm -rf hls/*prj
 	@rm -rf hls/*gz
 	@rm -rf npy
-	@rm -rf model
 	@rm -rf hls4ml_prj*
 	@rm -rf .ipynb_checkpoints
 	@rm -rf __pycache__

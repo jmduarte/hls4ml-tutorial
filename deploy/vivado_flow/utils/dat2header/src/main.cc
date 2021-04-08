@@ -15,11 +15,11 @@
 #endif
 
 // Word width should be a multiple of 8
-#define W_AXI_WIDTH 16
-#define I_AXI_WIDTH 6
+#define W_AXI_WIDTH 8
+#define I_AXI_WIDTH 8
 
-#define W_WIDTH 16
-#define I_WIDTH 6
+#define W_WIDTH 8
+#define I_WIDTH 8
 
 #if 1
 #define DATA_AXI_T ap_fixed<W_AXI_WIDTH, I_AXI_WIDTH>
@@ -84,14 +84,21 @@ int main(int argc, char **argv) {
 
     std::vector<DATA_AXI_T> data_fxd_vec;
     //std::copy(data_flt_vec.cbegin(), data_flt_vec.cend(), data_fxd_vec.begin());
+    unsigned j = 0;
     for (std::vector<float>::const_iterator i = data_flt_vec.cbegin(); i != data_flt_vec.cend(); i++) {
+        //std::cout << *i << std::endl;
         DATA_T data(*i);
+        //std::cout << data << std::endl;
         DATA_AXI_T data_axi(data);
+        //std::cout << data_axi << std::endl;
+        //std::cout << data_axi.to_string(16).c_str() << std::endl;
+        if (j++ % feature_count == 0) fout << std::endl;
+        std::cout << std::hex << ap_uint<8>(data_axi.range(7,0)).to_uint() << std::dec << " ";
         data_fxd_vec.push_back(data_axi);
     }
 
-    fout << "static unsigned short " << array_name << "_data[(" << array_name << "_SAMPLE_COUNT * " << array_name << "_FEATURE_COUNT)] = {";
-    unsigned j = 0;
+    fout << "static unsigned char " << array_name << "_data[(" << array_name << "_SAMPLE_COUNT * " << array_name << "_FEATURE_COUNT)] = {";
+    j = 0;
     for (std::vector<DATA_AXI_T>::const_iterator i = data_fxd_vec.cbegin(); i != data_fxd_vec.cend(); i++) {
         if (j++ % feature_count == 0) fout << std::endl;
 #if 1
