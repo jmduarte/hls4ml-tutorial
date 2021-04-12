@@ -18,9 +18,11 @@ create_project $proj $proj_dir -part xc7z020clg400-1
 # Set project properties
 set_property board_part tul.com.tw:pynq-z2:part0:1.0 [current_project]
 
+# set ip repo path
+set repo "$board\_anomaly_detector"
+
 # Set IP repository paths
-set_property ip_repo_paths ../../hls/$board\_m_axi_8_serial_prj/anomaly_detector_prj [current_project]
-update_ip_catalog -rebuild
+set_property ip_repo_paths ../../hls/$repo\_m_axi_8_serial_prj/anomaly_detector_prj [current_project]
 
 # Create the design block
 set design_name anomaly_detector_design
