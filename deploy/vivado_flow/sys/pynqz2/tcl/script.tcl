@@ -22,7 +22,11 @@ set_property board_part tul.com.tw:pynq-z2:part0:1.0 [current_project]
 set repo "$board\_anomaly_detector"
 
 # Set IP repository paths
+<<<<<<< HEAD
 set_property ip_repo_paths ../../hls/$repo\_m_axi_8_serial_prj/anomaly_detector_prj [current_project]
+=======
+set_property ip_repo_paths ../../hls/$board\_anomaly_detector_m_axi_8_serial_prj/anomaly_detector_prj [current_project]
+>>>>>>> 1a4dd81be56f049a2f40a8da84c8deae4e4682f2
 update_ip_catalog -rebuild
 
 # Create the design block
