@@ -1,0 +1,298 @@
+
+
+================================================================
+== Vivado HLS Report for 'dense_resource_ap_fixed_ap_fixed_config18_s'
+================================================================
+* Date:           Thu Apr 15 21:21:30 2021
+
+* Version:        2019.1 (Build 2552052 on Fri May 24 15:28:33 MDT 2019)
+* Project:        anomaly_detector_prj
+* Solution:       solution1
+* Product family: zynq
+* Target device:  xc7z020-clg400-1
+
+
+================================================================
+== Performance Estimates
+================================================================
++ Timing (ns): 
+    * Summary: 
+    +--------+-------+----------+------------+
+    |  Clock | Target| Estimated| Uncertainty|
+    +--------+-------+----------+------------+
+    |ap_clk  |  10.00|     7.424|        1.25|
+    +--------+-------+----------+------------+
+
++ Latency (clock cycles): 
+    * Summary: 
+    +-----+-----+-----+-----+---------------------------------------------+
+    |  Latency  |  Interval |                   Pipeline                  |
+    | min | max | min | max |                     Type                    |
+    +-----+-----+-----+-----+---------------------------------------------+
+    |  513|  514|  512|  512| loop rewind(delay=0 initiation interval(s)) |
+    +-----+-----+-----+-----+---------------------------------------------+
+
+    + Detail: 
+        * Instance: 
+        N/A
+
+        * Loop: 
+        +-------------+-----+-----+----------+-----------+-----------+------+----------+
+        |             |  Latency  | Iteration|  Initiation Interval  | Trip |          |
+        |  Loop Name  | min | max |  Latency |  achieved |   target  | Count| Pipelined|
+        +-------------+-----+-----+----------+-----------+-----------+------+----------+
+        |- ReuseLoop  |  513|  513|         3|          1|          1|   512|    yes   |
+        +-------------+-----+-----+----------+-----------+-----------+------+----------+
+
+
+
+================================================================
+== Utilization Estimates
+================================================================
+* Summary: 
++-----------------+---------+-------+--------+-------+-----+
+|       Name      | BRAM_18K| DSP48E|   FF   |  LUT  | URAM|
++-----------------+---------+-------+--------+-------+-----+
+|DSP              |        -|      -|       -|      -|    -|
+|Expression       |        -|      0|       0|    203|    -|
+|FIFO             |        -|      -|       -|      -|    -|
+|Instance         |        -|      -|       0|   2724|    -|
+|Memory           |        2|      -|       0|      0|    -|
+|Multiplexer      |        -|      -|       -|    474|    -|
+|Register         |        -|      -|     625|      -|    -|
++-----------------+---------+-------+--------+-------+-----+
+|Total            |        2|      0|     625|   3401|    0|
++-----------------+---------+-------+--------+-------+-----+
+|Available        |      280|    220|  106400|  53200|    0|
++-----------------+---------+-------+--------+-------+-----+
+|Utilization (%)  |    ~0   |      0|   ~0   |      6|    0|
++-----------------+---------+-------+--------+-------+-----+
+
++ Detail: 
+    * Instance: 
+    +--------------------------------------+--------------------------------+---------+-------+---+------+-----+
+    |               Instance               |             Module             | BRAM_18K| DSP48E| FF|  LUT | URAM|
+    +--------------------------------------+--------------------------------+---------+-------+---+------+-----+
+    |anomaly_detector_mux_646_7_1_1_U1516  |anomaly_detector_mux_646_7_1_1  |        0|      0|  0|  1362|    0|
+    |anomaly_detector_mux_83_32_1_1_U1517  |anomaly_detector_mux_83_32_1_1  |        0|      0|  0|  1362|    0|
+    +--------------------------------------+--------------------------------+---------+-------+---+------+-----+
+    |Total                                 |                                |        0|      0|  0|  2724|    0|
+    +--------------------------------------+--------------------------------+---------+-------+---+------+-----+
+
+    * DSP48E: 
+    N/A
+
+    * Memory: 
+    +-----------+--------------------------------------------------------------+---------+---+----+-----+------+-----+------+-------------+
+    |   Memory  |                            Module                            | BRAM_18K| FF| LUT| URAM| Words| Bits| Banks| W*Bits*Banks|
+    +-----------+--------------------------------------------------------------+---------+---+----+-----+------+-----+------+-------------+
+    |outidx5_U  |dense_resource_ap_fixed_ap_fixed_32_16_5_3_0_config6_s_oucud  |        1|  0|   0|    0|   512|    3|     1|         1536|
+    |w18_V_U    |dense_resource_ap_fixed_ap_fixed_config18_s_w18_V             |        1|  0|   0|    0|   512|    8|     1|         4096|
+    +-----------+--------------------------------------------------------------+---------+---+----+-----+------+-----+------+-------------+
+    |Total      |                                                              |        2|  0|   0|    0|  1024|   11|     2|         5632|
+    +-----------+--------------------------------------------------------------+---------+---+----+-----+------+-----+------+-------------+
+
+    * FIFO: 
+    N/A
+
+    * Expression: 
+    +-------------------------+----------+-------+---+----+------------+------------+
+    |      Variable Name      | Operation| DSP48E| FF| LUT| Bitwidth P0| Bitwidth P1|
+    +-------------------------+----------+-------+---+----+------------+------------+
+    |mul_ln728_fu_1890_p2     |     *    |      0|  0|  41|           7|           8|
+    |acc_0_V_fu_1928_p2       |     +    |      0|  0|  39|          32|          32|
+    |in_index_fu_1847_p2      |     +    |      0|  0|  39|          32|           1|
+    |w_index_fu_1841_p2       |     +    |      0|  0|  15|           1|           9|
+    |ap_condition_246         |    and   |      0|  0|   2|           1|           1|
+    |icmp_ln151_fu_1877_p2    |   icmp   |      0|  0|  13|           9|           2|
+    |icmp_ln168_fu_1863_p2    |   icmp   |      0|  0|  18|          26|           1|
+    |ap_block_state1          |    or    |      0|  0|   2|           1|           1|
+    |select_ln168_fu_1869_p3  |  select  |      0|  0|  32|           1|           1|
+    |ap_enable_pp0            |    xor   |      0|  0|   2|           1|           2|
+    +-------------------------+----------+-------+---+----+------------+------------+
+    |Total                    |          |      0|  0| 203|         111|          58|
+    +-------------------------+----------+-------+---+----+------------+------------+
+
+    * Multiplexer: 
+    +-----------------------------------------+----+-----------+-----+-----------+
+    |                   Name                  | LUT| Input Size| Bits| Total Bits|
+    +-----------------------------------------+----+-----------+-----+-----------+
+    |acc_0_V_024_reg_841                      |   9|          2|   32|         64|
+    |acc_1_V_023_reg_855                      |   9|          2|   32|         64|
+    |acc_2_V_022_reg_869                      |   9|          2|   32|         64|
+    |acc_3_V_021_reg_883                      |   9|          2|   32|         64|
+    |acc_4_V_020_reg_897                      |   9|          2|   32|         64|
+    |acc_5_V_019_reg_911                      |   9|          2|   32|         64|
+    |acc_6_V_018_reg_925                      |   9|          2|   32|         64|
+    |acc_7_V_017_reg_939                      |   9|          2|   32|         64|
+    |ap_NS_fsm                                |  15|          3|    1|          3|
+    |ap_done                                  |   9|          2|    1|          2|
+    |ap_enable_reg_pp0_iter1                  |   9|          2|    1|          2|
+    |ap_enable_reg_pp0_iter2                  |   9|          2|    1|          2|
+    |ap_phi_mux_acc_0_V_1_phi_fu_1167_p16     |  15|          3|   32|         96|
+    |ap_phi_mux_acc_1_V_1_phi_fu_1137_p16     |  15|          3|   32|         96|
+    |ap_phi_mux_acc_2_V_1_phi_fu_1107_p16     |  15|          3|   32|         96|
+    |ap_phi_mux_acc_3_V_1_phi_fu_1077_p16     |  15|          3|   32|         96|
+    |ap_phi_mux_acc_4_V_1_phi_fu_1047_p16     |  15|          3|   32|         96|
+    |ap_phi_mux_acc_5_V_1_phi_fu_1017_p16     |  15|          3|   32|         96|
+    |ap_phi_mux_acc_6_V_1_phi_fu_987_p16      |  15|          3|   32|         96|
+    |ap_phi_mux_acc_7_V_1_phi_fu_957_p16      |  15|          3|   32|         96|
+    |ap_phi_mux_in_index_0_i42_phi_fu_690_p6  |  15|          3|   32|         96|
+    |ap_phi_mux_p_0_0223_phi_fu_1414_p16      |  15|          3|   32|         96|
+    |ap_phi_mux_p_0_1225_phi_fu_1383_p16      |  15|          3|   32|         96|
+    |ap_phi_mux_p_0_2227_phi_fu_1352_p16      |  15|          3|   32|         96|
+    |ap_phi_mux_p_0_3229_phi_fu_1321_p16      |  15|          3|   32|         96|
+    |ap_phi_mux_p_0_4231_phi_fu_1290_p16      |  15|          3|   32|         96|
+    |ap_phi_mux_p_0_5233_phi_fu_1259_p16      |  15|          3|   32|         96|
+    |ap_phi_mux_p_0_6235_phi_fu_1228_p16      |  15|          3|   32|         96|
+    |ap_phi_mux_p_0_7237_phi_fu_1197_p16      |  15|          3|   32|         96|
+    |ap_phi_mux_w_index41_phi_fu_704_p6       |  15|          3|    9|         27|
+    |in_index_0_i42_reg_686                   |   9|          2|   32|         64|
+    |p_0_040_reg_729                          |   9|          2|   32|         64|
+    |p_0_138_reg_743                          |   9|          2|   32|         64|
+    |p_0_236_reg_757                          |   9|          2|   32|         64|
+    |p_0_334_reg_771                          |   9|          2|   32|         64|
+    |p_0_432_reg_785                          |   9|          2|   32|         64|
+    |p_0_530_reg_799                          |   9|          2|   32|         64|
+    |p_0_628_reg_813                          |   9|          2|   32|         64|
+    |p_0_726_reg_827                          |   9|          2|   32|         64|
+    |w_index41_reg_700                        |   9|          2|    9|         18|
+    +-----------------------------------------+----+-----------+-----+-----------+
+    |Total                                    | 474|         99| 1110|       2774|
+    +-----------------------------------------+----+-----------+-----+-----------+
+
+    * Register: 
+    +-----------------------------------+----+----+-----+-----------+
+    |                Name               | FF | LUT| Bits| Const Bits|
+    +-----------------------------------+----+----+-----+-----------+
+    |acc_0_V_024_reg_841                |  32|   0|   32|          0|
+    |acc_1_V_023_reg_855                |  32|   0|   32|          0|
+    |acc_2_V_022_reg_869                |  32|   0|   32|          0|
+    |acc_3_V_021_reg_883                |  32|   0|   32|          0|
+    |acc_4_V_020_reg_897                |  32|   0|   32|          0|
+    |acc_5_V_019_reg_911                |  32|   0|   32|          0|
+    |acc_6_V_018_reg_925                |  32|   0|   32|          0|
+    |acc_7_V_017_reg_939                |  32|   0|   32|          0|
+    |ap_CS_fsm                          |   2|   0|    2|          0|
+    |ap_done_reg                        |   1|   0|    1|          0|
+    |ap_enable_reg_pp0_iter1            |   1|   0|    1|          0|
+    |ap_enable_reg_pp0_iter2            |   1|   0|    1|          0|
+    |icmp_ln151_reg_1977                |   1|   0|    1|          0|
+    |icmp_ln151_reg_1977_pp0_iter1_reg  |   1|   0|    1|          0|
+    |in_index_0_i42_reg_686             |  32|   0|   32|          0|
+    |mul_ln728_reg_1986                 |  14|   0|   14|          0|
+    |out_index_reg_1981                 |   3|   0|    3|          0|
+    |p_0_040_reg_729                    |  32|   0|   32|          0|
+    |p_0_138_reg_743                    |  32|   0|   32|          0|
+    |p_0_236_reg_757                    |  32|   0|   32|          0|
+    |p_0_334_reg_771                    |  32|   0|   32|          0|
+    |p_0_432_reg_785                    |  32|   0|   32|          0|
+    |p_0_530_reg_799                    |  32|   0|   32|          0|
+    |p_0_628_reg_813                    |  32|   0|   32|          0|
+    |p_0_726_reg_827                    |  32|   0|   32|          0|
+    |select_ln168_reg_1972              |  32|   0|   32|          0|
+    |tmp_s_reg_1957                     |   7|   0|    7|          0|
+    |w_index41_reg_700                  |   9|   0|    9|          0|
+    |w_index_reg_1967                   |   9|   0|    9|          0|
+    +-----------------------------------+----+----+-----+-----------+
+    |Total                              | 625|   0|  625|          0|
+    +-----------------------------------+----+----+-----+-----------+
+
+
+
+================================================================
+== Interface
+================================================================
+* Summary: 
++----------------+-----+-----+------------+--------------------------------------------+--------------+
+|    RTL Ports   | Dir | Bits|  Protocol  |                Source Object               |    C Type    |
++----------------+-----+-----+------------+--------------------------------------------+--------------+
+|ap_clk          |  in |    1| ap_ctrl_hs | dense_resource<ap_fixed,ap_fixed,config18> | return value |
+|ap_rst          |  in |    1| ap_ctrl_hs | dense_resource<ap_fixed,ap_fixed,config18> | return value |
+|ap_start        |  in |    1| ap_ctrl_hs | dense_resource<ap_fixed,ap_fixed,config18> | return value |
+|ap_done         | out |    1| ap_ctrl_hs | dense_resource<ap_fixed,ap_fixed,config18> | return value |
+|ap_continue     |  in |    1| ap_ctrl_hs | dense_resource<ap_fixed,ap_fixed,config18> | return value |
+|ap_idle         | out |    1| ap_ctrl_hs | dense_resource<ap_fixed,ap_fixed,config18> | return value |
+|ap_ready        | out |    1| ap_ctrl_hs | dense_resource<ap_fixed,ap_fixed,config18> | return value |
+|data_0_V        |  in |    6|   ap_none  |                  data_0_V                  |    pointer   |
+|data_1_V        |  in |    6|   ap_none  |                  data_1_V                  |    pointer   |
+|data_2_V        |  in |    6|   ap_none  |                  data_2_V                  |    pointer   |
+|data_3_V        |  in |    6|   ap_none  |                  data_3_V                  |    pointer   |
+|data_4_V        |  in |    6|   ap_none  |                  data_4_V                  |    pointer   |
+|data_5_V        |  in |    6|   ap_none  |                  data_5_V                  |    pointer   |
+|data_6_V        |  in |    6|   ap_none  |                  data_6_V                  |    pointer   |
+|data_7_V        |  in |    6|   ap_none  |                  data_7_V                  |    pointer   |
+|data_8_V        |  in |    6|   ap_none  |                  data_8_V                  |    pointer   |
+|data_9_V        |  in |    6|   ap_none  |                  data_9_V                  |    pointer   |
+|data_10_V       |  in |    6|   ap_none  |                  data_10_V                 |    pointer   |
+|data_11_V       |  in |    6|   ap_none  |                  data_11_V                 |    pointer   |
+|data_12_V       |  in |    6|   ap_none  |                  data_12_V                 |    pointer   |
+|data_13_V       |  in |    6|   ap_none  |                  data_13_V                 |    pointer   |
+|data_14_V       |  in |    6|   ap_none  |                  data_14_V                 |    pointer   |
+|data_15_V       |  in |    6|   ap_none  |                  data_15_V                 |    pointer   |
+|data_16_V       |  in |    6|   ap_none  |                  data_16_V                 |    pointer   |
+|data_17_V       |  in |    6|   ap_none  |                  data_17_V                 |    pointer   |
+|data_18_V       |  in |    6|   ap_none  |                  data_18_V                 |    pointer   |
+|data_19_V       |  in |    6|   ap_none  |                  data_19_V                 |    pointer   |
+|data_20_V       |  in |    6|   ap_none  |                  data_20_V                 |    pointer   |
+|data_21_V       |  in |    6|   ap_none  |                  data_21_V                 |    pointer   |
+|data_22_V       |  in |    6|   ap_none  |                  data_22_V                 |    pointer   |
+|data_23_V       |  in |    6|   ap_none  |                  data_23_V                 |    pointer   |
+|data_24_V       |  in |    6|   ap_none  |                  data_24_V                 |    pointer   |
+|data_25_V       |  in |    6|   ap_none  |                  data_25_V                 |    pointer   |
+|data_26_V       |  in |    6|   ap_none  |                  data_26_V                 |    pointer   |
+|data_27_V       |  in |    6|   ap_none  |                  data_27_V                 |    pointer   |
+|data_28_V       |  in |    6|   ap_none  |                  data_28_V                 |    pointer   |
+|data_29_V       |  in |    6|   ap_none  |                  data_29_V                 |    pointer   |
+|data_30_V       |  in |    6|   ap_none  |                  data_30_V                 |    pointer   |
+|data_31_V       |  in |    6|   ap_none  |                  data_31_V                 |    pointer   |
+|data_32_V       |  in |    6|   ap_none  |                  data_32_V                 |    pointer   |
+|data_33_V       |  in |    6|   ap_none  |                  data_33_V                 |    pointer   |
+|data_34_V       |  in |    6|   ap_none  |                  data_34_V                 |    pointer   |
+|data_35_V       |  in |    6|   ap_none  |                  data_35_V                 |    pointer   |
+|data_36_V       |  in |    6|   ap_none  |                  data_36_V                 |    pointer   |
+|data_37_V       |  in |    6|   ap_none  |                  data_37_V                 |    pointer   |
+|data_38_V       |  in |    6|   ap_none  |                  data_38_V                 |    pointer   |
+|data_39_V       |  in |    6|   ap_none  |                  data_39_V                 |    pointer   |
+|data_40_V       |  in |    6|   ap_none  |                  data_40_V                 |    pointer   |
+|data_41_V       |  in |    6|   ap_none  |                  data_41_V                 |    pointer   |
+|data_42_V       |  in |    6|   ap_none  |                  data_42_V                 |    pointer   |
+|data_43_V       |  in |    6|   ap_none  |                  data_43_V                 |    pointer   |
+|data_44_V       |  in |    6|   ap_none  |                  data_44_V                 |    pointer   |
+|data_45_V       |  in |    6|   ap_none  |                  data_45_V                 |    pointer   |
+|data_46_V       |  in |    6|   ap_none  |                  data_46_V                 |    pointer   |
+|data_47_V       |  in |    6|   ap_none  |                  data_47_V                 |    pointer   |
+|data_48_V       |  in |    6|   ap_none  |                  data_48_V                 |    pointer   |
+|data_49_V       |  in |    6|   ap_none  |                  data_49_V                 |    pointer   |
+|data_50_V       |  in |    6|   ap_none  |                  data_50_V                 |    pointer   |
+|data_51_V       |  in |    6|   ap_none  |                  data_51_V                 |    pointer   |
+|data_52_V       |  in |    6|   ap_none  |                  data_52_V                 |    pointer   |
+|data_53_V       |  in |    6|   ap_none  |                  data_53_V                 |    pointer   |
+|data_54_V       |  in |    6|   ap_none  |                  data_54_V                 |    pointer   |
+|data_55_V       |  in |    6|   ap_none  |                  data_55_V                 |    pointer   |
+|data_56_V       |  in |    6|   ap_none  |                  data_56_V                 |    pointer   |
+|data_57_V       |  in |    6|   ap_none  |                  data_57_V                 |    pointer   |
+|data_58_V       |  in |    6|   ap_none  |                  data_58_V                 |    pointer   |
+|data_59_V       |  in |    6|   ap_none  |                  data_59_V                 |    pointer   |
+|data_60_V       |  in |    6|   ap_none  |                  data_60_V                 |    pointer   |
+|data_61_V       |  in |    6|   ap_none  |                  data_61_V                 |    pointer   |
+|data_62_V       |  in |    6|   ap_none  |                  data_62_V                 |    pointer   |
+|data_63_V       |  in |    6|   ap_none  |                  data_63_V                 |    pointer   |
+|res_0_V         | out |   32|   ap_vld   |                   res_0_V                  |    pointer   |
+|res_0_V_ap_vld  | out |    1|   ap_vld   |                   res_0_V                  |    pointer   |
+|res_1_V         | out |   32|   ap_vld   |                   res_1_V                  |    pointer   |
+|res_1_V_ap_vld  | out |    1|   ap_vld   |                   res_1_V                  |    pointer   |
+|res_2_V         | out |   32|   ap_vld   |                   res_2_V                  |    pointer   |
+|res_2_V_ap_vld  | out |    1|   ap_vld   |                   res_2_V                  |    pointer   |
+|res_3_V         | out |   32|   ap_vld   |                   res_3_V                  |    pointer   |
+|res_3_V_ap_vld  | out |    1|   ap_vld   |                   res_3_V                  |    pointer   |
+|res_4_V         | out |   32|   ap_vld   |                   res_4_V                  |    pointer   |
+|res_4_V_ap_vld  | out |    1|   ap_vld   |                   res_4_V                  |    pointer   |
+|res_5_V         | out |   32|   ap_vld   |                   res_5_V                  |    pointer   |
+|res_5_V_ap_vld  | out |    1|   ap_vld   |                   res_5_V                  |    pointer   |
+|res_6_V         | out |   32|   ap_vld   |                   res_6_V                  |    pointer   |
+|res_6_V_ap_vld  | out |    1|   ap_vld   |                   res_6_V                  |    pointer   |
+|res_7_V         | out |   32|   ap_vld   |                   res_7_V                  |    pointer   |
+|res_7_V_ap_vld  | out |    1|   ap_vld   |                   res_7_V                  |    pointer   |
++----------------+-----+-----+------------+--------------------------------------------+--------------+
+

@@ -1,0 +1,161 @@
+
+
+================================================================
+== Vivado HLS Report for 'normalize_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0'
+================================================================
+* Date:           Thu Apr 15 21:21:33 2021
+
+* Version:        2019.1 (Build 2552052 on Fri May 24 15:28:33 MDT 2019)
+* Project:        anomaly_detector_prj
+* Solution:       solution1
+* Product family: zynq
+* Target device:  xc7z020-clg400-1
+
+
+================================================================
+== Performance Estimates
+================================================================
++ Timing (ns): 
+    * Summary: 
+    +--------+-------+----------+------------+
+    |  Clock | Target| Estimated| Uncertainty|
+    +--------+-------+----------+------------+
+    |ap_clk  |  10.00|     8.510|        1.25|
+    +--------+-------+----------+------------+
+
++ Latency (clock cycles): 
+    * Summary: 
+    +-----+-----+-----+-----+---------+
+    |  Latency  |  Interval | Pipeline|
+    | min | max | min | max |   Type  |
+    +-----+-----+-----+-----+---------+
+    |    8|    8|    8|    8|   none  |
+    +-----+-----+-----+-----+---------+
+
+    + Detail: 
+        * Instance: 
+        N/A
+
+        * Loop: 
+        N/A
+
+
+
+================================================================
+== Utilization Estimates
+================================================================
+* Summary: 
++-----------------+---------+-------+--------+-------+-----+
+|       Name      | BRAM_18K| DSP48E|   FF   |  LUT  | URAM|
++-----------------+---------+-------+--------+-------+-----+
+|DSP              |        -|      -|       -|      -|    -|
+|Expression       |        -|      1|       0|    334|    -|
+|FIFO             |        -|      -|       -|      -|    -|
+|Instance         |        -|      -|       -|      -|    -|
+|Memory           |        -|      -|       -|      -|    -|
+|Multiplexer      |        -|      -|       -|    144|    -|
+|Register         |        -|      -|      42|      -|    -|
++-----------------+---------+-------+--------+-------+-----+
+|Total            |        0|      1|      42|    478|    0|
++-----------------+---------+-------+--------+-------+-----+
+|Available        |      280|    220|  106400|  53200|    0|
++-----------------+---------+-------+--------+-------+-----+
+|Utilization (%)  |        0|   ~0  |   ~0   |   ~0  |    0|
++-----------------+---------+-------+--------+-------+-----+
+
++ Detail: 
+    * Instance: 
+    N/A
+
+    * DSP48E: 
+    N/A
+
+    * Memory: 
+    N/A
+
+    * FIFO: 
+    N/A
+
+    * Expression: 
+    +-----------------+----------+-------+---+----+------------+------------+
+    |  Variable Name  | Operation| DSP48E| FF| LUT| Bitwidth P0| Bitwidth P1|
+    +-----------------+----------+-------+---+----+------------+------------+
+    |grp_fu_200_p2    |     *    |      1|  0|  20|          32|          11|
+    |res_0_V          |     +    |      0|  0|  39|          32|          17|
+    |res_1_V          |     +    |      0|  0|  39|          32|          17|
+    |res_2_V          |     +    |      0|  0|  39|          32|          17|
+    |res_3_V          |     +    |      0|  0|  39|          32|          18|
+    |res_4_V          |     +    |      0|  0|  39|          32|          18|
+    |res_5_V          |     +    |      0|  0|  39|          32|          17|
+    |res_6_V          |     +    |      0|  0|  39|          32|          18|
+    |res_7_V          |     +    |      0|  0|  39|          32|          17|
+    |ap_block_state1  |    or    |      0|  0|   2|           1|           1|
+    +-----------------+----------+-------+---+----+------------+------------+
+    |Total            |          |      1|  0| 334|         289|         151|
+    +-----------------+----------+-------+---+----+------------+------------+
+
+    * Multiplexer: 
+    +---------------+----+-----------+-----+-----------+
+    |      Name     | LUT| Input Size| Bits| Total Bits|
+    +---------------+----+-----------+-----+-----------+
+    |ap_NS_fsm      |  47|         10|    1|         10|
+    |ap_done        |   9|          2|    1|          2|
+    |grp_fu_200_p0  |  44|          9|   32|        288|
+    |grp_fu_200_p1  |  44|          9|   11|         99|
+    +---------------+----+-----------+-----+-----------+
+    |Total          | 144|         30|   45|        399|
+    +---------------+----+-----------+-----+-----------+
+
+    * Register: 
+    +-------------+----+----+-----+-----------+
+    |     Name    | FF | LUT| Bits| Const Bits|
+    +-------------+----+----+-----+-----------+
+    |ap_CS_fsm    |   9|   0|    9|          0|
+    |ap_done_reg  |   1|   0|    1|          0|
+    |reg_258      |  32|   0|   32|          0|
+    +-------------+----+----+-----+-----------+
+    |Total        |  42|   0|   42|          0|
+    +-------------+----+----+-----+-----------+
+
+
+
+================================================================
+== Interface
+================================================================
+* Summary: 
++----------------+-----+-----+------------+-------------------------------------------+--------------+
+|    RTL Ports   | Dir | Bits|  Protocol  |               Source Object               |    C Type    |
++----------------+-----+-----+------------+-------------------------------------------+--------------+
+|ap_clk          |  in |    1| ap_ctrl_hs | normalize.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0 | return value |
+|ap_rst          |  in |    1| ap_ctrl_hs | normalize.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0 | return value |
+|ap_start        |  in |    1| ap_ctrl_hs | normalize.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0 | return value |
+|ap_done         | out |    1| ap_ctrl_hs | normalize.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0 | return value |
+|ap_continue     |  in |    1| ap_ctrl_hs | normalize.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0 | return value |
+|ap_idle         | out |    1| ap_ctrl_hs | normalize.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0 | return value |
+|ap_ready        | out |    1| ap_ctrl_hs | normalize.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0 | return value |
+|data_0_V        |  in |   32|   ap_none  |                  data_0_V                 |    pointer   |
+|data_1_V        |  in |   32|   ap_none  |                  data_1_V                 |    pointer   |
+|data_2_V        |  in |   32|   ap_none  |                  data_2_V                 |    pointer   |
+|data_3_V        |  in |   32|   ap_none  |                  data_3_V                 |    pointer   |
+|data_4_V        |  in |   32|   ap_none  |                  data_4_V                 |    pointer   |
+|data_5_V        |  in |   32|   ap_none  |                  data_5_V                 |    pointer   |
+|data_6_V        |  in |   32|   ap_none  |                  data_6_V                 |    pointer   |
+|data_7_V        |  in |   32|   ap_none  |                  data_7_V                 |    pointer   |
+|res_0_V         | out |   32|   ap_vld   |                  res_0_V                  |    pointer   |
+|res_0_V_ap_vld  | out |    1|   ap_vld   |                  res_0_V                  |    pointer   |
+|res_1_V         | out |   32|   ap_vld   |                  res_1_V                  |    pointer   |
+|res_1_V_ap_vld  | out |    1|   ap_vld   |                  res_1_V                  |    pointer   |
+|res_2_V         | out |   32|   ap_vld   |                  res_2_V                  |    pointer   |
+|res_2_V_ap_vld  | out |    1|   ap_vld   |                  res_2_V                  |    pointer   |
+|res_3_V         | out |   32|   ap_vld   |                  res_3_V                  |    pointer   |
+|res_3_V_ap_vld  | out |    1|   ap_vld   |                  res_3_V                  |    pointer   |
+|res_4_V         | out |   32|   ap_vld   |                  res_4_V                  |    pointer   |
+|res_4_V_ap_vld  | out |    1|   ap_vld   |                  res_4_V                  |    pointer   |
+|res_5_V         | out |   32|   ap_vld   |                  res_5_V                  |    pointer   |
+|res_5_V_ap_vld  | out |    1|   ap_vld   |                  res_5_V                  |    pointer   |
+|res_6_V         | out |   32|   ap_vld   |                  res_6_V                  |    pointer   |
+|res_6_V_ap_vld  | out |    1|   ap_vld   |                  res_6_V                  |    pointer   |
+|res_7_V         | out |   32|   ap_vld   |                  res_7_V                  |    pointer   |
+|res_7_V_ap_vld  | out |    1|   ap_vld   |                  res_7_V                  |    pointer   |
++----------------+-----+-----+------------+-------------------------------------------+--------------+
+
