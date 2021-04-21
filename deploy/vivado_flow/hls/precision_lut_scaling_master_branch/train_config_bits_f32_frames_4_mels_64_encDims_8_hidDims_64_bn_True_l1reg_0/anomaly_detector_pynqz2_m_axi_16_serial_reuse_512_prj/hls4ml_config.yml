@@ -1,0 +1,216 @@
+Backend: Vivado
+ClockPeriod: 10
+HLSConfig:
+  LayerName:
+    activation:
+      Precision: ap_fixed<16,6>
+      ReuseFactor: 512
+      table_size: 1024
+      table_t: ap_fixed<18,8>
+    activation_1:
+      Precision: ap_fixed<16,6>
+      ReuseFactor: 512
+      table_size: 1024
+      table_t: ap_fixed<18,8>
+    activation_2:
+      Precision: ap_fixed<16,6>
+      ReuseFactor: 512
+      table_size: 1024
+      table_t: ap_fixed<18,8>
+    activation_3:
+      Precision: ap_fixed<16,6>
+      ReuseFactor: 512
+      table_size: 1024
+      table_t: ap_fixed<18,8>
+    activation_4:
+      Precision: ap_fixed<16,6>
+      ReuseFactor: 512
+      table_size: 1024
+      table_t: ap_fixed<18,8>
+    activation_5:
+      Precision: ap_fixed<16,6>
+      ReuseFactor: 512
+      table_size: 1024
+      table_t: ap_fixed<18,8>
+    activation_6:
+      Precision: ap_fixed<16,6>
+      ReuseFactor: 512
+      table_size: 1024
+      table_t: ap_fixed<18,8>
+    activation_7:
+      Precision: ap_fixed<16,6>
+      ReuseFactor: 512
+      table_size: 1024
+      table_t: ap_fixed<18,8>
+    activation_8:
+      Precision: ap_fixed<16,6>
+      ReuseFactor: 512
+      table_size: 1024
+      table_t: ap_fixed<18,8>
+    batch_normalization:
+      Precision:
+        bias: ap_fixed<16,6>
+        scale: ap_fixed<16,6>
+      ReuseFactor: 512
+    batch_normalization_1:
+      Precision:
+        bias: ap_fixed<16,6>
+        scale: ap_fixed<16,6>
+      ReuseFactor: 512
+    batch_normalization_2:
+      Precision:
+        bias: ap_fixed<16,6>
+        scale: ap_fixed<16,6>
+      ReuseFactor: 512
+    batch_normalization_3:
+      Precision:
+        bias: ap_fixed<16,6>
+        scale: ap_fixed<16,6>
+      ReuseFactor: 512
+    batch_normalization_4:
+      Precision:
+        bias: ap_fixed<16,6>
+        scale: ap_fixed<16,6>
+      ReuseFactor: 512
+    batch_normalization_5:
+      Precision:
+        bias: ap_fixed<16,6>
+        scale: ap_fixed<16,6>
+      ReuseFactor: 512
+    batch_normalization_6:
+      Precision:
+        bias: ap_fixed<16,6>
+        scale: ap_fixed<16,6>
+      ReuseFactor: 512
+    batch_normalization_7:
+      Precision:
+        bias: ap_fixed<16,6>
+        scale: ap_fixed<16,6>
+      ReuseFactor: 512
+    batch_normalization_8:
+      Precision:
+        bias: ap_fixed<16,6>
+        scale: ap_fixed<16,6>
+      ReuseFactor: 512
+    dense:
+      Precision:
+        bias: ap_fixed<16,6>
+        result: ap_fixed<16,6>
+        weight: ap_fixed<16,6>
+      ReuseFactor: 512
+    dense_1:
+      Precision:
+        bias: ap_fixed<16,6>
+        result: ap_fixed<16,6>
+        weight: ap_fixed<16,6>
+      ReuseFactor: 512
+    dense_1_linear:
+      Precision: ap_fixed<16,6>
+      ReuseFactor: 1
+      table_size: 1024
+      table_t: ap_fixed<18,8>
+    dense_2:
+      Precision:
+        bias: ap_fixed<16,6>
+        result: ap_fixed<16,6>
+        weight: ap_fixed<16,6>
+      ReuseFactor: 512
+    dense_2_linear:
+      Precision: ap_fixed<16,6>
+      ReuseFactor: 1
+      table_size: 1024
+      table_t: ap_fixed<18,8>
+    dense_3:
+      Precision:
+        bias: ap_fixed<16,6>
+        result: ap_fixed<16,6>
+        weight: ap_fixed<16,6>
+      ReuseFactor: 512
+    dense_3_linear:
+      Precision: ap_fixed<16,6>
+      ReuseFactor: 1
+      table_size: 1024
+      table_t: ap_fixed<18,8>
+    dense_4:
+      Precision:
+        bias: ap_fixed<16,6>
+        result: ap_fixed<16,6>
+        weight: ap_fixed<16,6>
+      ReuseFactor: 512
+    dense_4_linear:
+      Precision: ap_fixed<16,6>
+      ReuseFactor: 1
+      table_size: 1024
+      table_t: ap_fixed<18,8>
+    dense_5:
+      Precision:
+        bias: ap_fixed<16,6>
+        result: ap_fixed<16,6>
+        weight: ap_fixed<16,6>
+      ReuseFactor: 512
+    dense_5_linear:
+      Precision: ap_fixed<16,6>
+      ReuseFactor: 1
+      table_size: 1024
+      table_t: ap_fixed<18,8>
+    dense_6:
+      Precision:
+        bias: ap_fixed<16,6>
+        result: ap_fixed<16,6>
+        weight: ap_fixed<16,6>
+      ReuseFactor: 512
+    dense_6_linear:
+      Precision: ap_fixed<16,6>
+      ReuseFactor: 1
+      table_size: 1024
+      table_t: ap_fixed<18,8>
+    dense_7:
+      Precision:
+        bias: ap_fixed<16,6>
+        result: ap_fixed<16,6>
+        weight: ap_fixed<16,6>
+      ReuseFactor: 512
+    dense_7_linear:
+      Precision: ap_fixed<16,6>
+      ReuseFactor: 1
+      table_size: 1024
+      table_t: ap_fixed<18,8>
+    dense_8:
+      Precision:
+        bias: ap_fixed<16,6>
+        result: ap_fixed<16,6>
+        weight: ap_fixed<16,6>
+      ReuseFactor: 512
+    dense_8_linear:
+      Precision: ap_fixed<16,6>
+      ReuseFactor: 1
+      table_size: 1024
+      table_t: ap_fixed<18,8>
+    dense_9:
+      Precision:
+        bias: ap_fixed<16,6>
+        result: ap_fixed<16,6>
+        weight: ap_fixed<16,6>
+      ReuseFactor: 512
+    dense_9_linear:
+      Precision: ap_fixed<16,6>
+      ReuseFactor: 1
+      table_size: 1024
+      table_t: ap_fixed<18,8>
+    dense_linear:
+      Precision: ap_fixed<16,6>
+      ReuseFactor: 1
+      table_size: 1024
+      table_t: ap_fixed<18,8>
+    input_1:
+      Precision: ap_fixed<8,8>
+  Model:
+    Precision: ap_fixed<32,16>
+    ReuseFactor: 512
+    Strategy: Resource
+IOType: io_parallel
+KerasModel: !keras_model 'hls/precision_lut_scaling_master_branch/train_config_bits_f32_frames_4_mels_64_encDims_8_hidDims_64_bn_True_l1reg_0/anomaly_detector_pynqz2_m_axi_16_serial_reuse_512_prj/keras_model.h5'
+OutputDir: hls/precision_lut_scaling_master_branch/train_config_bits_f32_frames_4_mels_64_encDims_8_hidDims_64_bn_True_l1reg_0/anomaly_detector_pynqz2_m_axi_16_serial_reuse_512_prj
+ProjectName: anomaly_detector
+Stamp: Fa9499AD
+XilinxPart: xc7z020clg400-1
