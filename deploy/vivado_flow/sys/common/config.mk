@@ -1,13 +1,15 @@
+PROJECT = $(ACC)_project
+
 help:
 	@echo "INFO: make <TAB> for targets"
 .PHONY: help
 
 sys-gui:
-	vivado -source tcl/script.tcl -mode gui
+	vivado -source tcl/script.tcl -mode gui -tclargs $(ACC) $(INTERFACE)
 .PHONY: sys-gui
 
 sys:
-	vivado -source tcl/script.tcl -mode batch
+	vivado -source tcl/script.tcl -mode batch -tclargs $(ACC) $(INTERFACE)
 .PHONY: sys
 
 gui:

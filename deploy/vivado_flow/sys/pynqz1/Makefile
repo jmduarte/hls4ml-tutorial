@@ -1,4 +1,4 @@
-TOP = anomaly_detector
-PROJECT = $(TOP)_project
+ACC ?= resnet
+INTERFACE ?= m_axi
 
 include ../common/config.mk

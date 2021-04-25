@@ -1,33 +1,26 @@
-PROJECT_HLS=$(BOARD)_$(ACC)_m_axi_8_serial_prj
+PROJECT_HLS=$(BOARD)_m_axi_8_serial_prj
 
-PROJECT = $(ACC)_standalone
-PROJECT_I2C = i2c_test
+PROJECT = $(TOP)_standalone
 
 help:
 	@echo "INFO: make <TAB> to show targets"
 .PHONY: help
 
 setup:
-	xsct script.tcl $(ACC)
+	xsct script.tcl $(TOP)
 .PHONY: setup
 
 sdk: setup data
 	rm -f $(PROJECT)/src/helloworld.c
-	cd  $(PROJECT)/src && ln -s ../../../common/$(ACC)/main.c
-	#rm -f $(PROJECT_I2C)/src/helloworld.c
-	#cd  $(PROJECT_I2C)/src && ln -s ../../../main_i2c_test.c
+	cd  $(PROJECT)/src && ln -s ../../../common/$(TOP)/main_microblaze.c main.c
 .PHONY: sdk
-
-#sdk-irq: setup data
-#	rm -f $(PROJECT)/src/helloworld.c
-#	cd  $(PROJECT)/src && ln -s ../../../common/main_irq.c main.c
-#	#rm -f $(PROJECT_I2C)/src/helloworld.c
-#	#cd  $(PROJECT_I2C)/src && ln -s ../../../main_i2c_test.c
-#.PHONY: sdk-irq
 
 gui:
 	xsdk --workspace .
 .PHONY: gui
+
+SAMPLE_COUNT=10
+#SAMPLE_COUNT=166000
 
 data:
 	make -C ../../utils/dat2header/sim
@@ -40,11 +33,12 @@ clean:
 	rm -rf $(PROJECT)_bsp
 	rm -rf $(PROJECT_I2C)
 	rm -rf $(PROJECT_I2C)_bsp
-	rm -rf $(ACC)_platform
+	rm -rf $(TOP)_platform
 	rm -rf RemoteSystemsTempFiles
 	rm -rf SDK.log
 	rm -rf webtalk
 	rm -rf .sdk
 	rm -rf .Xil
 	rm -rf .metadata
+	rm -rf updatemem*
 .PHONY: clean
