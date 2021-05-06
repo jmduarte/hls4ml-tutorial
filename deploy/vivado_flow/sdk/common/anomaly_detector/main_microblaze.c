@@ -91,7 +91,7 @@ XAnomaly_detector_axi_Config *do_anomaly_detector_cfg;
 void init_accelerators()
 {
     xil_printf("INFO: Initializing accelerator\n\r");
-    do_anomaly_detector_cfg = XAnomaly_detector_axi_LookupConfig(XPAR_ANOMALY_DETECTOR_AXI_0_DEVICE_ID);
+    do_anomaly_detector_cfg = XAnomaly_detector_axi_LookupConfig(XPAR_ANOMALY_DETECTOR_AXI_DEVICE_ID);
     if (do_anomaly_detector_cfg)
     {
         int status  = XAnomaly_detector_axi_CfgInitialize(&do_anomaly_detector, do_anomaly_detector_cfg);
@@ -235,7 +235,7 @@ int main(int argc, char** argv)
     }
     for (int i = 0; i < OUTPUT_N_ELEMENTS; i++) {
         gld_mem[i] = dst_data[i];
-        dst_mem[i] = 0x0;
+        dst_mem[i] = 0xFF;
     }
 
     /* ****** SOFTWARE REFERENCE ****** */
@@ -267,21 +267,23 @@ int main(int argc, char** argv)
     xil_printf("INFO: Configure and start accelerator\n\r");
 #endif
 
-    for (unsigned j = 0; j < ITERATION_FACTOR; j++) {
-
 #ifdef PROFILING
         XTime_GetTime(&start);
+#endif
         Xil_DCacheFlushRange((UINTPTR)src_mem, INPUT_N_ELEMENTS * sizeof(unsigned char));
         Xil_DCacheFlushRange((UINTPTR)dst_mem, OUTPUT_N_ELEMENTS * sizeof(unsigned char));
         Xil_DCacheFlushRange((UINTPTR)gld_mem, OUTPUT_N_ELEMENTS * sizeof(unsigned char));
+#ifdef PROFILING
         XTime_GetTime(&stop);
         cache_elapsed = get_elapsed_time(start, stop);
 #endif
 
+    for (unsigned j = 0; j < ITERATION_FACTOR; j++) {
+
     	unsigned char *src_mem_i = src_mem;
     	unsigned char *dst_mem_i = dst_mem;
 
-    	for (unsigned i = 0; i < 1; i++) {
+    	for (unsigned i = 0; i < src_SAMPLE_COUNT; i++) {
 
     		/* Configure the accelerator */
 #ifdef PROFILING
@@ -289,6 +291,7 @@ int main(int argc, char** argv)
 #endif
     		XAnomaly_detector_axi_Set_in_V(&do_anomaly_detector, (unsigned)src_mem_i);
     		XAnomaly_detector_axi_Set_out_V(&do_anomaly_detector, (unsigned)dst_mem_i);
+    		XAnomaly_detector_axi_Set_batch(&do_anomaly_detector, dst_SAMPLE_COUNT);
 
     		XAnomaly_detector_axi_Start(&do_anomaly_detector);
 
@@ -306,7 +309,7 @@ int main(int argc, char** argv)
     		dst_mem_i += dst_FEATURE_COUNT;
     	}
     }
-#if 0
+#if 1
 #ifdef PROFILING
     XTime_GetTime(&start);
 #endif

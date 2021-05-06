@@ -313,7 +313,7 @@ int main(int argc, char** argv)
 
     /* Accelerator validation */
     hw_errors = 0;
-#if 0
+#if 1
     for (int i = 0; i < OUTPUT_N_ELEMENTS; i++)
     {
         if (dst_mem[i] != gld_mem[i])

@@ -4,7 +4,7 @@
  *
  */
 
-#include "xanomaly_detector_axi.h"  /* accelerator */
+#include "xresnet_axi.h"  /* accelerator */
 #ifdef PROFILING
 #include "stdio.h"       /* printf */
 #endif
@@ -12,9 +12,7 @@
 #include "stdlib.h"
 #include "malloc.h"
 #include "xil_io.h"      /* peripheral read/write wrappers */
-#ifdef PROFILING
-#include "xtime_l.h"     /* to measure performance of the system */
-#endif
+#include "time.h"
 #include "platform.h"    /* platform init/cleanup functions */
 #include "xil_cache.h"   /* enable/disable caches etc */
 #include "xil_printf.h"  /* UART debug print functions */
@@ -84,17 +82,17 @@ unsigned char *dst_mem;
 #endif
 
 /* accelerator configuration */
-XAnomaly_detector_axi do_anomaly_detector;
-XAnomaly_detector_axi_Config *do_anomaly_detector_cfg;
+XResnet_axi do_resnet;
+XResnet_axi_Config *do_resnet_cfg;
 
 /* accelerator initialization routine */
 void init_accelerators()
 {
     xil_printf("INFO: Initializing accelerator\n\r");
-    do_anomaly_detector_cfg = XAnomaly_detector_axi_LookupConfig(XPAR_ANOMALY_DETECTOR_AXI_0_DEVICE_ID);
-    if (do_anomaly_detector_cfg)
+    do_resnet_cfg = XResnet_axi_LookupConfig(XPAR_RESNET_AXI_DEVICE_ID);
+    if (do_resnet_cfg)
     {
-        int status  = XAnomaly_detector_axi_CfgInitialize(&do_anomaly_detector, do_anomaly_detector_cfg);
+        int status  = XResnet_axi_CfgInitialize(&do_resnet, do_resnet_cfg);
         if (status != XST_SUCCESS)
         {
             xil_printf("ERROR: Initializing accelerator\n\r");
@@ -121,7 +119,7 @@ void init_accelerators()
 //#endif
 
 /* golden model of the accelerator in software */
-int anomaly_detector_sw(unsigned char *src, unsigned char *dst, unsigned input_n_elements, unsigned output_n_elements)
+int resnet_sw(unsigned char *src, unsigned char *dst, unsigned input_n_elements, unsigned output_n_elements)
 {
     xil_printf("INFO: Golden results are pre-compiled. It would be nice to run a software model here.\n\r");
     // See src.h and dst.h for input and golden output respectively.
@@ -130,9 +128,9 @@ int anomaly_detector_sw(unsigned char *src, unsigned char *dst, unsigned input_n
 
 #ifdef PROFILING
 /* profiling function */
-double get_elapsed_time(XTime start, XTime stop)
+double get_elapsed_time(clock_t start, clock_t stop)
 {
-    return 1.0 * (stop - start) / (COUNTS_PER_SECOND);
+    return ((double)(stop - start)) / (CLOCKS_PER_SEC);
 }
 #endif
 
@@ -182,22 +180,19 @@ void dump_data(const char* label, unsigned char* data, unsigned sample_count, un
 /* the top of the hill :-) */
 int main(int argc, char** argv)
 {
-#ifdef PROFILING
-    XTime start, stop;
+    clock_t start, stop;
     double calibration_time;
     double sw_elapsed;
-#endif
+
     char __attribute__ ((unused)) dummy; /* dummy input */
 
     int hw_errors;
-#ifdef PROFILING
     double hw_elapsed = 0;
     double cache_elapsed = 0;
-#endif
 
     xil_printf("\n\r");
     xil_printf("INFO: ===============================================\n\r");
-    xil_printf("INFO: Anomaly Detector (w/ polling)\n\r");
+    xil_printf("INFO: ResNet (w/ polling)\n\r");
     xil_printf("INFO: ===============================================\n\r");
 
     /* initialize platform (uart and caches) */
@@ -211,9 +206,9 @@ int main(int argc, char** argv)
 
     /* calibration */
 #ifdef PROFILING
-    XTime_GetTime(&start);
+    start = clock();
     sleep(1);
-    XTime_GetTime(&stop);
+    stop = clock();
     calibration_time = get_elapsed_time(start, stop);
     xil_printf("INFO: Time calibration for one second (%lf sec)\n\r", calibration_time);
 #endif
@@ -235,7 +230,7 @@ int main(int argc, char** argv)
     }
     for (int i = 0; i < OUTPUT_N_ELEMENTS; i++) {
         gld_mem[i] = dst_data[i];
-        dst_mem[i] = 0x0;
+        dst_mem[i] = 0xFF;
     }
 
     /* ****** SOFTWARE REFERENCE ****** */
@@ -243,12 +238,12 @@ int main(int argc, char** argv)
     xil_printf("INFO: Start SW accelerator\n\r");
 #endif
 #ifdef PROFILING
-    XTime_GetTime(&start);
+    start = clock();
 #endif
 
-    anomaly_detector_sw(src_mem, gld_mem, INPUT_N_ELEMENTS, OUTPUT_N_ELEMENTS);
+    resnet_sw(src_mem, gld_mem, INPUT_N_ELEMENTS, OUTPUT_N_ELEMENTS);
 #ifdef PROFILING
-    XTime_GetTime(&stop);
+    stop = clock();
     sw_elapsed = get_elapsed_time(start, stop);
 #endif
 #if 0
@@ -267,38 +262,40 @@ int main(int argc, char** argv)
     xil_printf("INFO: Configure and start accelerator\n\r");
 #endif
 
-    for (unsigned j = 0; j < ITERATION_FACTOR; j++) {
-
 #ifdef PROFILING
-        XTime_GetTime(&start);
-        Xil_DCacheFlushRange((UINTPTR)src_mem, INPUT_N_ELEMENTS * sizeof(unsigned char));
-        Xil_DCacheFlushRange((UINTPTR)dst_mem, OUTPUT_N_ELEMENTS * sizeof(unsigned char));
-        Xil_DCacheFlushRange((UINTPTR)gld_mem, OUTPUT_N_ELEMENTS * sizeof(unsigned char));
-        XTime_GetTime(&stop);
-        cache_elapsed = get_elapsed_time(start, stop);
+    start = clock();
 #endif
+    Xil_DCacheFlushRange((UINTPTR)src_mem, INPUT_N_ELEMENTS * sizeof(unsigned char));
+    Xil_DCacheFlushRange((UINTPTR)dst_mem, OUTPUT_N_ELEMENTS * sizeof(unsigned char));
+    Xil_DCacheFlushRange((UINTPTR)gld_mem, OUTPUT_N_ELEMENTS * sizeof(unsigned char));
+#ifdef PROFILING
+    stop = clock();
+    cache_elapsed = get_elapsed_time(start, stop);
+#endif
+
+    for (unsigned j = 0; j < ITERATION_FACTOR; j++) {
 
     	unsigned char *src_mem_i = src_mem;
     	unsigned char *dst_mem_i = dst_mem;
 
-    	for (unsigned i = 0; i < 1; i++) {
+    	for (unsigned i = 0; i < src_SAMPLE_COUNT; i++) {
 
     		/* Configure the accelerator */
 #ifdef PROFILING
-    		XTime_GetTime(&start);
+    		start = clock();
 #endif
-    		XAnomaly_detector_axi_Set_in_V(&do_anomaly_detector, (unsigned)src_mem_i);
-    		XAnomaly_detector_axi_Set_out_V(&do_anomaly_detector, (unsigned)dst_mem_i);
+    		XResnet_axi_Set_in_V(&do_resnet, (unsigned)src_mem_i);
+    		XResnet_axi_Set_out_V(&do_resnet, (unsigned)dst_mem_i);
 
-    		XAnomaly_detector_axi_Start(&do_anomaly_detector);
+    		XResnet_axi_Start(&do_resnet);
 
     		/* polling */
-    		while (!XAnomaly_detector_axi_IsDone(&do_anomaly_detector));
+    		while (!XResnet_axi_IsDone(&do_resnet));
 
     		/* get error status */
-    		//hw_flags = XAnomaly_detector_axi_Get_return(&do_anomaly_detector);
+    		//hw_flags = XResnet_axi_Get_return(&do_resnet);
 #ifdef PROFILING
-    		XTime_GetTime(&stop);
+    		stop = clock();
     		hw_elapsed += get_elapsed_time(start, stop);
 #endif
 
@@ -306,13 +303,13 @@ int main(int argc, char** argv)
     		dst_mem_i += dst_FEATURE_COUNT;
     	}
     }
-#if 0
+
 #ifdef PROFILING
-    XTime_GetTime(&start);
+    start = clock();
 #endif
     Xil_DCacheFlushRange((UINTPTR)dst_mem, OUTPUT_N_ELEMENTS * sizeof(unsigned char));
 #ifdef PROFILING
-    XTime_GetTime(&stop);
+    stop = clock();
     cache_elapsed += get_elapsed_time(start, stop);
 #endif
 
@@ -347,7 +344,7 @@ int main(int argc, char** argv)
         xil_printf("INFO: Accelerator validation: FAIL\n\r");
     else
         xil_printf("INFO: Accelerator validation: PASS!\n\r");
-#endif
+
     xil_printf("INFO: done!\n\r");
     xil_printf("INFO: ===============================================\n\r");
 

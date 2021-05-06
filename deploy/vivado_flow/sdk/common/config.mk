@@ -29,12 +29,6 @@ gui:
 	xsdk --workspace .
 .PHONY: gui
 
-data:
-	make -C ../../utils/dat2header/sim
-	../../utils/dat2header/sim/dat2header ../../hls/$(PROJECT_HLS)/tb_data/tb_input_features.dat $(PROJECT)/src/src.h src $(SAMPLE_COUNT)
-	../../utils/dat2header/sim/dat2header ../../hls/$(PROJECT_HLS)/tb_data/csim_results.log $(PROJECT)/src/dst.h dst $(SAMPLE_COUNT)
-.PHONY: data
-
 clean:
 	rm -rf $(PROJECT)
 	rm -rf $(PROJECT)_bsp
