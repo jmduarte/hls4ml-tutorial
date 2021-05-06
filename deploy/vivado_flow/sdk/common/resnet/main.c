@@ -4,7 +4,7 @@
  *
  */
 
-#include "xanomaly_detector_axi.h"  /* accelerator */
+#include "xresnet_axi.h"  /* accelerator */
 #include "stdio.h"       /* printf */
 #include "unistd.h"      /* sleep */
 #include "stdlib.h"
@@ -53,9 +53,9 @@
   (byte & 0x01 ? '1' : '0')
 
 
-#define MAX_PRINT_ELEMENTS (2)
+#define MAX_PRINT_ELEMENTS (4)
 
-#define ITERATION_FACTOR (1000)
+#define ITERATION_FACTOR (1)
 
 const unsigned INPUT_N_ELEMENTS = src_SAMPLE_COUNT*src_FEATURE_COUNT;
 const unsigned OUTPUT_N_ELEMENTS = dst_SAMPLE_COUNT*dst_FEATURE_COUNT;
@@ -80,17 +80,17 @@ unsigned char *dst_mem;
 #endif
 
 /* accelerator configuration */
-XAnomaly_detector_axi do_anomaly_detector;
-XAnomaly_detector_axi_Config *do_anomaly_detector_cfg;
+XResnet_axi do_resnet;
+XResnet_axi_Config *do_resnet_cfg;
 
 /* accelerator initialization routine */
 void init_accelerators()
 {
     printf("INFO: Initializing accelerator\n\r");
-    do_anomaly_detector_cfg = XAnomaly_detector_axi_LookupConfig(XPAR_ANOMALY_DETECTOR_AXI_DEVICE_ID);
-    if (do_anomaly_detector_cfg)
+    do_resnet_cfg = XResnet_axi_LookupConfig(XPAR_RESNET_AXI_DEVICE_ID);
+    if (do_resnet_cfg)
     {
-        int status  = XAnomaly_detector_axi_CfgInitialize(&do_anomaly_detector, do_anomaly_detector_cfg);
+        int status  = XResnet_axi_CfgInitialize(&do_resnet, do_resnet_cfg);
         if (status != XST_SUCCESS)
         {
             printf("ERROR: Initializing accelerator\n\r");
@@ -117,7 +117,7 @@ void init_accelerators()
 //#endif
 
 /* golden model of the accelerator in software */
-int anomaly_detector_sw(unsigned char *src, unsigned char *dst, unsigned input_n_elements, unsigned output_n_elements)
+int resnet_sw(unsigned char *src, unsigned char *dst, unsigned input_n_elements, unsigned output_n_elements)
 {
     printf("INFO: Golden results are pre-compiled. It would be nice to run a software model here.\n");
     // See src.h and dst.h for input and golden output respectively.
@@ -188,7 +188,7 @@ int main(int argc, char** argv)
 
     printf("\n\r");
     printf("INFO: ===============================================\n\r");
-    printf("INFO: Anomaly Detector (w/ polling)\n\r");
+    printf("INFO: ResNet (w/ polling)\n\r");
     printf("INFO: ===============================================\n\r");
 
     /* initialize platform (uart and caches) */
@@ -233,7 +233,7 @@ int main(int argc, char** argv)
 #endif
     XTime_GetTime(&start);
 
-    anomaly_detector_sw(src_mem, gld_mem, INPUT_N_ELEMENTS, OUTPUT_N_ELEMENTS);
+    resnet_sw(src_mem, gld_mem, INPUT_N_ELEMENTS, OUTPUT_N_ELEMENTS);
     XTime_GetTime(&stop);
     sw_elapsed = get_elapsed_time(start, stop);
 
@@ -242,7 +242,7 @@ int main(int argc, char** argv)
     printf("INFO:   - Iteration factor: %u\n\r", ITERATION_FACTOR);
     printf("INFO:   - Sample count : %u\n\r", src_SAMPLE_COUNT);
 #endif
-#if 1
+
     /* ****** ACCELERATOR ****** */
     xil_printf("INFO: Press any key to start the accelerator: ");
     dummy = inbyte();
@@ -258,42 +258,40 @@ int main(int argc, char** argv)
     Xil_DCacheFlushRange((UINTPTR)gld_mem, OUTPUT_N_ELEMENTS * sizeof(unsigned char));
     XTime_GetTime(&stop);
     cache_elapsed = get_elapsed_time(start, stop);
-#if 1
+
     for (unsigned j = 0; j < ITERATION_FACTOR; j++) {
 
     	unsigned char *src_mem_i = src_mem;
     	unsigned char *dst_mem_i = dst_mem;
 
-    	//for (unsigned i = 0; i < src_SAMPLE_COUNT; i++) {
-
+    	for (unsigned i = 0; i < src_SAMPLE_COUNT; i++) {
+#if 1
     		/* Configure the accelerator */
     		XTime_GetTime(&start);
-    		XAnomaly_detector_axi_Set_in_V(&do_anomaly_detector, (unsigned)src_mem_i);
-    		XAnomaly_detector_axi_Set_out_V(&do_anomaly_detector, (unsigned)dst_mem_i);
-    		XAnomaly_detector_axi_Set_batch(&do_anomaly_detector, dst_SAMPLE_COUNT);
+    		XResnet_axi_Set_in_V(&do_resnet, (unsigned)src_mem_i);
+    		XResnet_axi_Set_out_V(&do_resnet, (unsigned)dst_mem_i);
 
-    		XAnomaly_detector_axi_Start(&do_anomaly_detector);
+    		XResnet_axi_Start(&do_resnet);
 
     		/* polling */
-    		while (!XAnomaly_detector_axi_IsDone(&do_anomaly_detector));
+    		while (!XResnet_axi_IsDone(&do_resnet));
 
     		/* get error status */
-    		//hw_flags = XAnomaly_detector_axi_Get_return(&do_anomaly_detector);
+    		//hw_flags = XResnet_axi_Get_return(&do_resnet);
     		XTime_GetTime(&stop);
     		hw_elapsed += get_elapsed_time(start, stop);
-
-    	//	src_mem_i += src_FEATURE_COUNT;
-    	//	dst_mem_i += dst_FEATURE_COUNT;
-    	//}
-    }
 #endif
+    		src_mem_i += src_FEATURE_COUNT;
+    		dst_mem_i += dst_FEATURE_COUNT;
+    	}
+    }
+
     XTime_GetTime(&start);
     Xil_DCacheFlushRange((UINTPTR)dst_mem, OUTPUT_N_ELEMENTS * sizeof(unsigned char));
     XTime_GetTime(&stop);
     cache_elapsed += get_elapsed_time(start, stop);
 
     printf("INFO: Accelerator done!");
-#endif
     /* ****** VALIDATION ****** */
 
 #ifdef __DEBUG__
@@ -307,13 +305,12 @@ int main(int argc, char** argv)
     printf("INFO: Software execution time: %f sec\n\r", sw_elapsed);
 
     printf("INFO: Total acceleration execution time (%d inferences): %f sec\n\r", ITERATION_FACTOR*src_SAMPLE_COUNT, hw_elapsed);
-    printf("INFO: Per-inference execution time (average): %.12f sec (%f ns)\n\r", hw_elapsed / (ITERATION_FACTOR * src_SAMPLE_COUNT), (hw_elapsed*1000.0) / (ITERATION_FACTOR * src_SAMPLE_COUNT));
+    printf("INFO: Per-inference execution time (average): %.12f sec (%f ms)\n\r", hw_elapsed / (ITERATION_FACTOR * src_SAMPLE_COUNT), (hw_elapsed*1000.0) / (ITERATION_FACTOR * src_SAMPLE_COUNT));
     printf("INFO: Cache flush time: %f sec\n\r", cache_elapsed);
     printf("INFO: Accelerator/software speedup (the software is fake so this does not count...): %.2f X\n\r", (sw_elapsed >= (hw_elapsed+cache_elapsed))?(sw_elapsed/(hw_elapsed+cache_elapsed)):-((hw_elapsed+cache_elapsed)/sw_elapsed));
 
     /* Accelerator validation */
     hw_errors = 0;
-#if 1
     for (int i = 0; i < OUTPUT_N_ELEMENTS; i++)
     {
         if (dst_mem[i] != gld_mem[i])
@@ -327,7 +324,7 @@ int main(int argc, char** argv)
         printf("INFO: Accelerator validation: FAIL\n\r");
     else
         printf("INFO: Accelerator validation: PASS!\n\r");
-#endif
+
     printf("INFO: Validation done!\n\r");
     printf("INFO: ===============================================\n\r");
 

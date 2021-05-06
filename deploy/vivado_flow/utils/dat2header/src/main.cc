@@ -15,11 +15,21 @@
 #endif
 
 // Word width should be a multiple of 8
+#ifndef W_AXI_WIDTH
 #define W_AXI_WIDTH 8
-#define I_AXI_WIDTH 8
+#endif
 
+#ifndef I_AXI_WIDTH
+#define I_AXI_WIDTH 1
+#endif
+
+#ifndef W_WIDTH
 #define W_WIDTH 8
-#define I_WIDTH 8
+#endif
+
+#ifndef I_WIDTH
+#define I_WIDTH 1
+#endif
 
 #if 1
 #define DATA_AXI_T ap_fixed<W_AXI_WIDTH, I_AXI_WIDTH>
@@ -79,6 +89,7 @@ int main(int argc, char **argv) {
         if (sample_count >= sample_max) break;
     }
     feature_count = data_flt_vec.size() / sample_count;
+    fout << "// ap_fixed<" << W_AXI_WIDTH << "," << I_AXI_WIDTH << ">" << std::endl;
     fout << "#define " << array_name << "_SAMPLE_COUNT " << sample_count << std::endl;
     fout << "#define " << array_name << "_FEATURE_COUNT " << feature_count << std::endl;
 
@@ -92,7 +103,7 @@ int main(int argc, char **argv) {
         DATA_AXI_T data_axi(data);
         //std::cout << data_axi << std::endl;
         //std::cout << data_axi.to_string(16).c_str() << std::endl;
-        if (j++ % feature_count == 0) fout << std::endl;
+        //if (j++ % feature_count == 0) fout << std::endl;
         std::cout << std::hex << ap_uint<8>(data_axi.range(7,0)).to_uint() << std::dec << " ";
         data_fxd_vec.push_back(data_axi);
     }

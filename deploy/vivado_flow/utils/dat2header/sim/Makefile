@@ -41,6 +41,11 @@ INCDIR += -I../inc
 #INCDIR += -I../inc/ac_types
 INCDIR += -I../inc/ap_types
 
+W_AXI_WIDTH ?= 8
+I_AXI_WIDTH ?= 1
+W_WIDTH ?= 8
+I_WIDTH ?= 1
+
 # Compilation options:
 # -O0 -g for debugging info and -Wall enables all warnings
 
@@ -48,6 +53,12 @@ CXX_FLAGS :=
 CXX_FLAGS += -Wall
 CXX_FLAGS += -Wno-int-in-bool-context
 CXX_FLAGS += -std=c++11
+CXX_FLAGS += -DW_AXI_WIDTH=$(W_AXI_WIDTH)
+CXX_FLAGS += -DI_AXI_WIDTH=$(I_AXI_WIDTH)
+CXX_FLAGS += -DW_WIDTH=$(W_WIDTH)
+CXX_FLAGS += -DI_WIDTH=$(I_WIDTH)
+
+
 
 release: CXX_FLAGS += -O3
 release: $(EXE)
