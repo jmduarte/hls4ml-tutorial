@@ -17,5 +17,5 @@ gui:
 .PHONY: gui
 
 clean:
-	rm -rf *.log *.txt *.jou *.str *_project NA
+	rm -rf *.log *.txt *.jou *.str $(ACC)_project NA
 .PHONY: clean

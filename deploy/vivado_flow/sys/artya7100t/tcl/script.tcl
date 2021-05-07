@@ -1,19 +1,29 @@
 # Script
 
+set acc ""
+set interface ""
+
+if { $argc == 2 } {
+    set acc [lindex $argv 0]
+    set interface [lindex $argv 1]
+} else {
+    puts "Error!"
+}
+
 # Set accelerator
-set accname "anomaly_detector_axi"
+set top_module $acc\_axi
 
 # Set directory
-set proj_dir "./anomaly_detector_project"
+set proj_dir "./$acc\_project"
 
 # Set project
-set proj "anomaly_detector_project"
+set proj "$acc\_project"
 
 # Set design name
-set design_name "anomaly_detector_design"
+set design_name $acc\_design
 
-# Set board name
-set board_name "artya7100t"
+# Set board
+set board "artya7100t"
 
 # Create project
 create_project $proj $proj_dir -part xc7a100tcsg324-1
@@ -22,7 +32,7 @@ create_project $proj $proj_dir -part xc7a100tcsg324-1
 set_property board_part digilentinc.com:arty-a7-100:part0:1.0 [current_project]
 
 # Set IP repository paths
-set_property ip_repo_paths ../../hls/$board_name\_anomaly_detector_m_axi_8_serial_prj/anomaly_detector_prj [current_project]
+set_property ip_repo_paths ../../hls/$board\_$acc\_m_axi_8_serial_prj/$acc\_prj [current_project]
 update_ip_catalog -rebuild
 
 # Create the design block
@@ -39,7 +49,7 @@ apply_bd_automation -rule xilinx.com:bd_rule:board -config { Board_Interface {re
 
 # Create UART interface
 create_bd_cell -type ip -vlnv xilinx.com:ip:axi_uartlite:2.0 axi_uartlite_0
-apply_board_connection -board_interface "usb_uart" -ip_intf "axi_uartlite_0/UART" -diagram "anomaly_detector_design"
+apply_board_connection -board_interface "usb_uart" -ip_intf "axi_uartlite_0/UART" -diagram $design_name
 
 # Create instance of MicroBlaze
 create_bd_cell -type ip -vlnv xilinx.com:ip:microblaze:11.0 microblaze
@@ -64,15 +74,15 @@ apply_bd_automation -rule xilinx.com:bd_rule:axi4 \
       master_apm {0} }  [get_bd_intf_pins axi_uartlite_0/S_AXI]
 
 # Add accelerator and connect s-axi interface
-create_bd_cell -type ip -vlnv xilinx.com:hls:$accname:1.0 $accname
+create_bd_cell -type ip -vlnv xilinx.com:hls:$top_module:1.0 $top_module
 apply_bd_automation -rule xilinx.com:bd_rule:axi4 \
   -config { Clk_master {/clk_wizard/clk_out1 (100 MHz)} \
             Clk_slave {Auto} \
             Clk_xbar {/clk_wizard/clk_out1 (100 MHz)} \
             Master {/microblaze (Periph)} \
-            Slave {/$accname/s_axi_CTRL_BUS} \
+            Slave {/$top_module/s_axi_CTRL_BUS} \
             intc_ip {/microblaze_axi_periph} \
-            master_apm {0} }  [get_bd_intf_pins $accname/s_axi_CTRL_BUS]
+            master_apm {0} }  [get_bd_intf_pins $top_module/s_axi_CTRL_BUS]
 
 # Reconfigure local memory to support accelerator DMA
 set_property -dict [list CONFIG.C_NUM_LMB {2}] [get_bd_cells microblaze_local_memory/dlmb_bram_if_cntlr]
@@ -95,8 +105,8 @@ apply_bd_automation -rule xilinx.com:bd_rule:board -config { Board_Interface {re
 connect_bd_intf_net -boundary_type upper [get_bd_intf_pins axi_interconnect_0/M00_AXI] [get_bd_intf_pins axi_bram_ctrl/S_AXI]
 connect_bd_intf_net [get_bd_intf_pins axi_bram_ctrl/BRAM_PORTA] [get_bd_intf_pins microblaze_local_memory/lmb_bram/BRAM_PORTB]
 move_bd_cells [get_bd_cells microblaze_local_memory] [get_bd_cells axi_bram_ctrl]
-connect_bd_intf_net -boundary_type upper [get_bd_intf_pins axi_interconnect_0/S00_AXI] [get_bd_intf_pins $accname/m_axi_IN_BUS]
-connect_bd_intf_net -boundary_type upper [get_bd_intf_pins axi_interconnect_0/S01_AXI] [get_bd_intf_pins $accname/m_axi_OUT_BUS]
+connect_bd_intf_net -boundary_type upper [get_bd_intf_pins axi_interconnect_0/S00_AXI] [get_bd_intf_pins $top_module/m_axi_IN_BUS]
+connect_bd_intf_net -boundary_type upper [get_bd_intf_pins axi_interconnect_0/S01_AXI] [get_bd_intf_pins $top_module/m_axi_OUT_BUS]
 apply_bd_automation -rule xilinx.com:bd_rule:clkrst -config {Clk "/clk_wizard/clk_out1 (100 MHz)" }  [get_bd_pins axi_interconnect_0/ACLK]
 apply_bd_automation -rule xilinx.com:bd_rule:clkrst -config {Clk "/clk_wizard/clk_out1 (100 MHz)" }  [get_bd_pins axi_interconnect_0/S00_ACLK]
 apply_bd_automation -rule xilinx.com:bd_rule:clkrst -config {Clk "/clk_wizard/clk_out1 (100 MHz)" }  [get_bd_pins axi_interconnect_0/M00_ACLK]
@@ -127,6 +137,23 @@ set_property name microblaze_mcu [get_bd_cells microblaze]
 #connect_bd_net [get_bd_pins microblaze_axi_periph/M01_ARESETN] [get_bd_pins rst_clk_wizard_100M/peripheral_aresetn]
 #connect_bd_net [get_bd_pins axi_interconnect_0/S01_ARESETN] [get_bd_pins rst_clk_wizard_100M/peripheral_aresetn]
 
+# Add timer
+create_bd_cell -type ip -vlnv xilinx.com:ip:axi_timer:2.0 axi_timer_0
+set_property name axi_timer_mcu [get_bd_cells axi_timer_0]
+
+# Wire timer
+apply_bd_automation -rule xilinx.com:bd_rule:axi4 -config { Clk_master {/clk_wizard/clk_out1 (100 MHz)} Clk_slave {Auto} Clk_xbar {/clk_wizard/clk_out1 (100 MHz)} Master {/microblaze_mcu (Periph)} Slave {/axi_timer_mcu/S_AXI} intc_ip {/microblaze_axi_periph} master_apm {0}}  [get_bd_intf_pins axi_timer_mcu/S_AXI]
+set_property -dict [list CONFIG.mode_64bit {1}] [get_bd_cells axi_timer_mcu]
+
+# Create interrupt controller
+create_bd_cell -type ip -vlnv xilinx.com:ip:axi_intc:4.1 axi_intc_0
+set_property name axi_intc_mcu [get_bd_cells axi_intc_0]
+
+# Wire interrupt controller
+apply_bd_automation -rule xilinx.com:bd_rule:axi4 -config { Clk_master {/clk_wizard/clk_out1 (100 MHz)} Clk_slave {Auto} Clk_xbar {/clk_wizard/clk_out1 (100 MHz)} Master {/microblaze_mcu (Periph)} Slave {/axi_intc_mcu/s_axi} intc_ip {/microblaze_axi_periph} master_apm {0}}  [get_bd_intf_pins axi_intc_mcu/s_axi]
+
+connect_bd_net [get_bd_pins axi_timer_mcu/interrupt] [get_bd_pins axi_intc_mcu/intr]
+connect_bd_intf_net [get_bd_intf_pins axi_intc_mcu/interrupt] [get_bd_intf_pins microblaze_mcu/INTERRUPT]
 
 # Validate the design block we created
 validate_bd_design
@@ -154,5 +181,5 @@ if {[get_property PROGRESS [get_runs impl_1]] != "100%"} {
 # Export the bitstream and the hardware for the SDK
 puts "INFO: Export hardware..."
 file copy -force $proj_dir/$proj.runs/impl_1/$design_name\_wrapper.sysdef \
-    ../../sdk/$board_name/hdf/$design_name\_m_axi_8_serial_wrapper.hdf
+    ../../sdk/$board/hdf/$design_name\_m_axi_8_serial_wrapper.hdf
 

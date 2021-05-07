@@ -1,13 +1,23 @@
 # Script
 
+set acc ""
+set interface ""
+
+if { $argc == 2 } {
+    set acc [lindex $argv 0]
+    set interface [lindex $argv 1]
+} else {
+    puts "Error!"
+}
+
 # Set accelerator
-set accname anomaly_detector_axi
+set top_module $acc\_axi
 
 # Set directory
-set proj_dir "./anomaly_detector_project"
+set proj_dir "./$acc\_project"
 
 # Set project
-set proj "anomaly_detector_project"
+set proj "$acc\_project"
 
 # Set board
 set board "pynqz2"
@@ -16,21 +26,15 @@ set board "pynqz2"
 create_project $proj $proj_dir -part xc7z020clg400-1
 
 # Set project properties
+#set_property board_part www.digilentinc.com:pynq-z1:part0:1.0 [current_project]
 set_property board_part tul.com.tw:pynq-z2:part0:1.0 [current_project]
 
-# set ip repo path
-set repo "$board\_anomaly_detector"
-
 # Set IP repository paths
-<<<<<<< HEAD
-set_property ip_repo_paths ../../hls/$repo\_m_axi_8_serial_prj/anomaly_detector_prj [current_project]
-=======
-set_property ip_repo_paths ../../hls/$board\_anomaly_detector_m_axi_8_serial_prj/anomaly_detector_prj [current_project]
->>>>>>> 1a4dd81be56f049a2f40a8da84c8deae4e4682f2
+set_property ip_repo_paths ../../hls/$board\_$acc\_$interface\_8_serial_prj/$acc\_prj [current_project]
 update_ip_catalog -rebuild
 
 # Create the design block
-set design_name anomaly_detector_design
+set design_name $acc\_design
 create_bd_design $design_name
 
 # Name of the processing system (PS)
@@ -40,7 +44,7 @@ set ps "xilinx.com:ip:processing_system7:5.5"
 set axi_inter "xilinx.com:ip:axi_interconnect:2.1"
 
 # Create instance: accelerator acc and set properties
-set acc_0 [ create_bd_cell -type ip -vlnv xilinx.com:hls:$accname:1.0 $accname]
+set acc_0 [ create_bd_cell -type ip -vlnv xilinx.com:hls:$top_module:1.0 $top_module]
 
 # Create instance: processing_system_0, and set properties
 set zynq_ps [ create_bd_cell -type ip -vlnv $ps zynq_ps ]
@@ -75,15 +79,15 @@ set_property -dict [ list CONFIG.PCW_USE_S_AXI_GP0 {1} ] $zynq_ps
 set_property -dict [ list CONFIG.PSU__CRL_APB__PL0_REF_CTRL__FREQMHZ {100} ] $zynq_ps
 
 ## Connection of the interrupt signal
-#connect_bd_net [get_bd_pins $accname/interrupt] \
+#connect_bd_net [get_bd_pins $top_module/interrupt] \
 #    [get_bd_pins zynq_ps/pl_ps_irq0]
 
 # Connections of the different AXI channels
-connect_bd_intf_net [get_bd_intf_pins $accname/m_axi_IN_BUS] \
+connect_bd_intf_net [get_bd_intf_pins $top_module/m_axi_IN_BUS] \
    -boundary_type upper [get_bd_intf_pins axi_interconnect_1/S00_AXI]
-connect_bd_intf_net [get_bd_intf_pins $accname/m_axi_OUT_BUS] \
+connect_bd_intf_net [get_bd_intf_pins $top_module/m_axi_OUT_BUS] \
    -boundary_type upper [get_bd_intf_pins axi_interconnect_1/S01_AXI]
-connect_bd_intf_net [get_bd_intf_pins $accname/s_axi_CTRL_BUS] \
+connect_bd_intf_net [get_bd_intf_pins $top_module/s_axi_CTRL_BUS] \
    -boundary_type upper [get_bd_intf_pins axi_interconnect_0/M00_AXI]
 connect_bd_intf_net [get_bd_intf_pins zynq_ps/M_AXI_GP0] \
    -boundary_type upper [get_bd_intf_pins axi_interconnect_0/S00_AXI]
@@ -92,7 +96,7 @@ connect_bd_intf_net [get_bd_intf_pins zynq_ps/S_AXI_GP0] \
 
 # Connection for the clock signals (done with run connect automation)
 apply_bd_automation -rule xilinx.com:bd_rule:clkrst -config \
-    {Clk "/zynq_ps/FCLK_CLK0 (50 MHz)" }  [get_bd_pins $accname/ap_clk]
+    {Clk "/zynq_ps/FCLK_CLK0 (50 MHz)" }  [get_bd_pins $top_module/ap_clk]
 apply_bd_automation -rule xilinx.com:bd_rule:clkrst -config \
     {Clk "/zynq_ps/FCLK_CLK0 (50 MHz)" }  [get_bd_pins zynq_ps/M_AXI_GP0_ACLK]
 apply_bd_automation -rule xilinx.com:bd_rule:clkrst -config \
@@ -104,10 +108,12 @@ apply_bd_automation -rule xilinx.com:bd_rule:clkrst -config \
 
 # Assign the address in memory for the accelerator execution
 assign_bd_address
-delete_bd_objs [get_bd_addr_segs -excluded $accname/Data_m_axi_IN_BUS/SEG_zynq_ps_GP0_IOP]
-delete_bd_objs [get_bd_addr_segs -excluded $accname/Data_m_axi_IN_BUS/SEG_zynq_ps_GP0_M_AXI_GP0]
-delete_bd_objs [get_bd_addr_segs -excluded $accname/Data_m_axi_OUT_BUS/SEG_zynq_ps_GP0_IOP]
-delete_bd_objs [get_bd_addr_segs -excluded $accname/Data_m_axi_OUT_BUS/SEG_zynq_ps_GP0_M_AXI_GP0]
+delete_bd_objs [get_bd_addr_segs -excluded $top_module/Data_m_axi_IN_BUS/SEG_zynq_ps_GP0_IOP]
+delete_bd_objs [get_bd_addr_segs -excluded $top_module/Data_m_axi_IN_BUS/SEG_zynq_ps_GP0_M_AXI_GP0]
+delete_bd_objs [get_bd_addr_segs -excluded $top_module/Data_m_axi_OUT_BUS/SEG_zynq_ps_GP0_IOP]
+delete_bd_objs [get_bd_addr_segs -excluded $top_module/Data_m_axi_OUT_BUS/SEG_zynq_ps_GP0_M_AXI_GP0]
+delete_bd_objs [get_bd_addr_segs -excluded $top_module/Data_m_axi_IN_BUS/SEG_zynq_ps_GP0_QSPI_LINEAR]
+delete_bd_objs [get_bd_addr_segs -excluded $top_module/Data_m_axi_OUT_BUS/SEG_zynq_ps_GP0_QSPI_LINEAR]
 
 # Validate the design block we created
 validate_bd_design
@@ -135,5 +141,5 @@ if {[get_property PROGRESS [get_runs impl_1]] != "100%"} {
 # Export the bitstream and the hardware for the SDK
 puts "INFO: Export hardware..."
 file copy -force $proj_dir/$proj.runs/impl_1/$design_name\_wrapper.sysdef \
-    ../../sdk/$board/hdf/$design_name\_m_axi_8_serial_wrapper.hdf
+    ../../sdk/$board/hdf/$design_name\_$interface\_8_serial_wrapper.hdf
 
