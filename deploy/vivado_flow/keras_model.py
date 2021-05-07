@@ -17,12 +17,16 @@ from tensorflow.keras.layers import Input, Dense, BatchNormalization, Activation
 from tensorflow.keras.regularizers import l1
 from qkeras.qlayers import QDense, QActivation
 from qkeras.quantizers import quantized_bits, quantized_relu
+from qkeras.qnormalization import QBatchNormalization
+
+import logging
 
 
 def get_model(name,inputDim,**kwargs):
     if name=='keras_model':
         return get_keras_model(inputDim,**kwargs)
     elif name=='qkeras_model':
+        logging.debug('fetched qkeras_model')
         return get_qkeras_model(inputDim,**kwargs)
     else:
         print('ERROR')
@@ -31,63 +35,44 @@ def get_model(name,inputDim,**kwargs):
 ########################################################################
 # keras model
 ########################################################################
-def get_keras_model(inputDim,hiddenDim=128,encodeDim=8, batchNorm=True, l1reg=0):
+def get_keras_model(inputDim,hiddenDim=128,encodeDim=8, batchNorm=True, qBatchNorm=False, l1reg=0, input_batchNorm=False, halfcode_layers=4, fan_in_out=64, **kwargs):
     """
     define the keras model
     the model based on the simple dense auto encoder 
     (128*128*128*128*8*128*128*128*128)
     """
     
+    # Declare encode network
     inputLayer = Input(shape=(inputDim,))
-    
-
     kwargs = {'kernel_regularizer': l1(l1reg)}
 
-
-    h = Dense(hiddenDim,**kwargs)(inputLayer)
-    if batchNorm:
-        h = BatchNormalization()(h)
-    h = Activation('relu')(h)
-
-    h = Dense(hiddenDim,**kwargs)(h)
-    if batchNorm:
-        h = BatchNormalization()(h)
-    h = Activation('relu')(h)
-
-    h = Dense(hiddenDim,**kwargs)(h)
-    if batchNorm:
-        h = BatchNormalization()(h)
-    h = Activation('relu')(h)
-
-    h = Dense(hiddenDim,**kwargs)(h)
-    if batchNorm:
-        h = BatchNormalization()(h)
-    h = Activation('relu')(h)
+    for i in range(halfcode_layers):
+        if i==0:
+            h = Dense(fan_in_out,**kwargs)(inputLayer)
+        else:
+            h = Dense(hiddenDim,**kwargs)(h)
+        if batchNorm:
+            h = BatchNormalization()(h)
+        h = Activation('relu')(h)
     
-    h = Dense(encodeDim,**kwargs)(h)
+    #Declare latent layer
+    if halfcode_layers==0:
+        h = Dense(encodeDim,**kwargs)(inputLayer)
+    else:
+        h = Dense(encodeDim,**kwargs)(h)
     if batchNorm:
         h = BatchNormalization()(h)
     h = Activation('relu')(h)
 
-    h = Dense(hiddenDim,**kwargs)(h)
-    if batchNorm:
-        h = BatchNormalization()(h)
-    h = Activation('relu')(h)
-
-    h = Dense(hiddenDim,**kwargs)(h)
-    if batchNorm:
-        h = BatchNormalization()(h)
-    h = Activation('relu')(h)
-
-    h = Dense(hiddenDim,**kwargs)(h)
-    if batchNorm:
-        h = BatchNormalization()(h)
-    h = Activation('relu')(h)
-
-    h = Dense(hiddenDim,**kwargs)(h)
-    if batchNorm:
-        h = BatchNormalization()(h)
-    h = Activation('relu')(h)
+    # Declare decoder network
+    for i in range(halfcode_layers):
+        if i==halfcode_layers-1:
+            h = Dense(fan_in_out,**kwargs)(h)
+        else:
+            h = Dense(hiddenDim,**kwargs)(h)
+        if batchNorm:
+            h = BatchNormalization()(h)
+        h = Activation('relu')(h)
 
     h = Dense(inputDim,**kwargs)(h)
 
@@ -99,8 +84,8 @@ def get_keras_model(inputDim,hiddenDim=128,encodeDim=8, batchNorm=True, l1reg=0)
 def get_qkeras_model(inputDim,hiddenDim=128,encodeDim=8,
                      bits=7,intBits=0,
                      reluBits=7,reluIntBits=3,
-                     lastBits=7,lastIntBits=3,
-                     l1reg=0,batchNorm=True):
+                     lastBits=7,lastIntBits=7,
+                     l1reg=0,batchNorm=True, qBatchNorm=False, input_batchNorm=False, halfcode_layers=4, fan_in_out=64, **kwargs):
     """
     define the keras model
     the model based on the simple dense auto encoder 
@@ -112,51 +97,44 @@ def get_qkeras_model(inputDim,hiddenDim=128,encodeDim=8,
               'kernel_initializer': 'lecun_uniform', 
               'kernel_regularizer': l1(l1reg)
           }
-
-    h = QDense(hiddenDim, **kwargs)(inputLayer)
-    if batchNorm:
-        h = BatchNormalization()(h)
-    h = QActivation(activation=quantized_relu(reluBits,reluIntBits))(h)
-
-    h = QDense(hiddenDim, **kwargs)(h)
-    if batchNorm:
-        h = BatchNormalization()(h)
-    h = QActivation(activation=quantized_relu(reluBits,reluIntBits))(h)
-
-    h = QDense(hiddenDim, **kwargs)(h)
-    if batchNorm:
-        h = BatchNormalization()(h)
-    h = QActivation(activation=quantized_relu(reluBits,reluIntBits))(h)
-
-    h = QDense(hiddenDim, **kwargs)(h)
-    if batchNorm:
-        h = BatchNormalization()(h)
-    h = QActivation(activation=quantized_relu(reluBits,reluIntBits))(h)
     
-    h = QDense(encodeDim, **kwargs)(h)
+    # Declare encoder network
+    for i in range(halfcode_layers):
+        if i==0:
+            h = QDense(fan_in_out, **kwargs)(inputLayer)
+        else:
+            h = QDense(hiddenDim, **kwargs)(h)
+        if batchNorm:
+            if qBatchNorm:
+                h = QBatchNormalization()(h)
+            else:
+                h = BatchNormalization()(h)
+        h = QActivation(activation=quantized_relu(reluBits,reluIntBits))(h)
+    
+    # Declare latent space
+    if halfcode_layers==0:
+        h = QDense(encodeDim, **kwargs)(inputLayer)
+    else:
+        h = QDense(encodeDim, **kwargs)(h)
     if batchNorm:
-        h = BatchNormalization()(h)
+        if qBatchNorm:
+            h = QBatchNormalization()(h)
+        else:
+            h = BatchNormalization()(h)
     h = QActivation(activation=quantized_relu(reluBits,reluIntBits))(h)
 
-    h = QDense(hiddenDim, **kwargs)(h)
-    if batchNorm:
-        h = BatchNormalization()(h)
-    h = QActivation(activation=quantized_relu(reluBits,reluIntBits))(h)
-
-    h = QDense(hiddenDim, **kwargs)(h)
-    if batchNorm:
-        h = BatchNormalization()(h)
-    h = QActivation(activation=quantized_relu(reluBits,reluIntBits))(h)
-
-    h = QDense(hiddenDim, **kwargs)(h)
-    if batchNorm:
-        h = BatchNormalization()(h)
-    h = QActivation(activation=quantized_relu(reluBits,reluIntBits))(h)
-
-    h = QDense(hiddenDim, **kwargs)(h)
-    if batchNorm:
-        h = BatchNormalization()(h)
-    h = QActivation(activation=quantized_relu(reluBits,reluIntBits))(h)
+    # Declare decoder network
+    for i in range(halfcode_layers):
+        if i ==halfcode_layers-1:
+            h = QDense(fan_in_out, **kwargs)(h)
+        else:
+            h = QDense(hiddenDim, **kwargs)(h)
+        if batchNorm:
+            if qBatchNorm:
+                h = QBatchNormalization()(h)
+            else:
+                h = BatchNormalization()(h)
+        h = QActivation(activation=quantized_relu(reluBits,reluIntBits))(h)
 
     kwargslast = {'kernel_quantizer': quantized_bits(lastBits,lastIntBits,alpha=1),
               'bias_quantizer': quantized_bits(lastBits,lastIntBits,alpha=1), 
@@ -166,7 +144,6 @@ def get_qkeras_model(inputDim,hiddenDim=128,encodeDim=8,
     h = QDense(inputDim, **kwargslast)(h)
 
     return Model(inputs=inputLayer, outputs=h)
-
 
     
 #########################################################################

@@ -31,14 +31,15 @@ else:
 print('-----------------------------------')
 
 # 
-# halfcode = [0,1,2,3,]
-fan = [16,32,64]
+
 
 # list of models being synthesized
-models = ["model/precision_fan_code_layers/train_config_bits_6_frames_4_mels_64_encDims_8_hidDims_64_halfcode_3_fan_{}_bn_True_qbatch_False_l1reg_0/model_ToyCar.h5".format(f) for f in fan]
+models = ["model/medium_model/train_config_bits_{}_frames_4_mels_64_encDims_8_hidDims_64_halfcode_4_fan_64_bn_False_qbatch_False_l1reg_0/model_ToyCar.h5".format(prec) for prec in [16,14,12,10,8,6]]
 
 # number of bits for quantized layers
-quantizations = [6 for model in models]
+quantizations = [13,12,11,10,8,6,5,16,14,]
+accum_t = 'ap_fixed<32,16>'
+BN_quant =[13]
 
 for indx, model_file in enumerate(models):
     if not os.path.exists(model_file):
@@ -64,8 +65,7 @@ for indx, model_file in enumerate(models):
     if isinstance(quantizations[indx], int):
         INT_BITS = int(quantizations[indx]/2)+1
         BITS = quantizations[indx] +1
-    reuse = [512, 256]
-    v_synth_state = [True,]
+    reuse = [512]
     #Valid ReuseFactor(s): scales based on input feature size
     for REUSE in reuse:
         hls_config = hls4ml.utils.config_from_keras_model(model, granularity='name')
@@ -81,19 +81,19 @@ for indx, model_file in enumerate(models):
                     hls_config['LayerName'][layer]['Precision']['weight'] = 'ap_fixed<{},1>'.format(BITS)
                     hls_config['LayerName'][layer]['Precision']['bias'] = 'ap_fixed<{},1>'.format(BITS)
                     hls_config['LayerName'][layer]['ReuseFactor'] = REUSE
-                    # hls_config['LayerName']['q_dense']['accum_t'] = accum_t
+                    hls_config['LayerName']['q_dense']['accum_t'] = accum_t
 
 
                 if 'normalization' in layer:
-                    hls_config['LayerName'][layer]['Precision']['scale'] = 'ap_fixed<{},{}>'.format(16, 6)
-                    hls_config['LayerName'][layer]['Precision']['bias'] = 'ap_fixed<{},{}>'.format(16, 6)
+                    hls_config['LayerName'][layer]['Precision']['scale'] = 'ap_fixed<{},{}>'.format(13, 6)
+                    hls_config['LayerName'][layer]['Precision']['bias'] = 'ap_fixed<{},{}>'.format(13, 6)
                     hls_config['LayerName'][layer]['ReuseFactor'] = REUSE
-                    # hls_config['LayerName']['batch_normalization']['accum_t'] = accum_t
+                    hls_config['LayerName']['batch_normalization']['accum_t'] = accum_t
 
                 if 'activation' in layer:
                     hls_config['LayerName'][layer]['Precision']['result'] = 'ap_fixed<{},{}>'.format(BITS, INT_BITS)
                     hls_config['LayerName'][layer]['ReuseFactor'] = REUSE
-                    # hls_config['LayerName']['q_activation']['accum_t'] = accum_t
+                    hls_config['LayerName']['q_activation']['accum_t'] = accum_t
 
         plotting.print_dict(hls_config)
 
@@ -102,8 +102,8 @@ for indx, model_file in enumerate(models):
         axi_width = 16 # 16, 32, 64
         implementation = 'serial' # 'serial', 'dataflow'
 
-        sub_dir = 'num_layers_lut_scaling_master_branch/precision_fan_code_layers/train_config_bits_6_frames_4_mels_64_encDims_8_hidDims_64_halfcode_3_fan_{}_bn_True_qbatch_False_l1reg_0'.format(fan[indx])
-        output_dir='hls/'+sub_dir+'/' + project_name + '_' + board_name + '_' + interface + '_' + str(axi_width) + '_' + implementation + '_reuse_' +str(REUSE) + '_prj' 
+        sub_dir = 'medium_model/no_BN_dense_quantization'
+        output_dir='hls/'+sub_dir+'/' + project_name + '_' + board_name + '_' + interface + '_' + str(axi_width) + '_' + implementation + '_dense_Q_'+str(quantizations[indx]) + '_reuse_' +str(REUSE) + '_prj' 
 
         # SET BACKEND
         # backend_config = hls4ml.converters.create_backend_config(fpga_part=fpga_part)
@@ -143,7 +143,7 @@ for indx, model_file in enumerate(models):
         y = np.load('./test_data/test_data_frames_4_hops_512_fft_1024_mels_64_power_2.0_ground_truths.npy', allow_pickle=True)
         plot_roc(hls_model=hls_model, keras_model=model, X=X, y=y, output_dir=output_dir)
 
-        hls_model.build(csim=True,synth=True,export=False, vsynth=False)
+        hls_model.build(csim=True,synth=True,export=False, vsynth=True)
 
         hls4ml.report.read_vivado_report(output_dir)
         plotting.print_dict(hls_config)

@@ -1,7 +1,7 @@
 Copyright 1986-2019 Xilinx, Inc. All Rights Reserved.
 ------------------------------------------------------------------------------------
 | Tool Version : Vivado v.2019.1 (lin64) Build 2552052 Fri May 24 14:47:09 MDT 2019
-| Date         : Wed Apr 21 15:20:45 2021
+| Date         : Wed Apr 21 16:14:24 2021
 | Host         : muhizi-3 running 64-bit Ubuntu 18.04.5 LTS
 | Command      : report_utilization -file vivado_synth.rpt
 | Design       : anomaly_detector
