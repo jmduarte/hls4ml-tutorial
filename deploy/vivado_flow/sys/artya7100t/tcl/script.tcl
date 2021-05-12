@@ -73,6 +73,9 @@ apply_bd_automation -rule xilinx.com:bd_rule:axi4 \
       intc_ip {New AXI Interconnect} \
       master_apm {0} }  [get_bd_intf_pins axi_uartlite_0/S_AXI]
 
+# Enable full FPU
+set_property -dict [list CONFIG.C_USE_FPU {2}] [get_bd_cells microblaze]
+
 # Add accelerator and connect s-axi interface
 create_bd_cell -type ip -vlnv xilinx.com:hls:$top_module:1.0 $top_module
 apply_bd_automation -rule xilinx.com:bd_rule:axi4 \
