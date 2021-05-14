@@ -32,6 +32,33 @@
 XTmrCtr TimerCounterInst;
 #define TMRCTR_DEVICE_ID	XPAR_TMRCTR_0_DEVICE_ID
 #define TIMER_CNTR_0		0
+#define TIMER_CNTR_1		1
+
+void start_64b_counter() {
+	XTmrCtr_Start(&TimerCounterInst, TIMER_CNTR_0);
+	XTmrCtr_Start(&TimerCounterInst, TIMER_CNTR_1);
+}
+
+void stop_64b_counter() {
+    XTmrCtr_Stop(&TimerCounterInst, TIMER_CNTR_0);
+    XTmrCtr_Stop(&TimerCounterInst, TIMER_CNTR_1);
+}
+
+u64 get_64b_counter_value() {
+	//printf("bytes %u\n\r", sizeof(u64));
+	u64 lo_counter = XTmrCtr_GetValue(&TimerCounterInst, TIMER_CNTR_0);
+	u64 hi_counter = XTmrCtr_GetValue(&TimerCounterInst, TIMER_CNTR_1);
+	u64 counter = (hi_counter << 32) | lo_counter;
+	//printf("INFO: hi = %lu, lo = %lu, total = %lu\n\r", hi_counter, lo_counter, counter);
+	return counter;
+}
+
+/* profiling function */
+float get_elapsed_time_ns(u64 clks)
+{
+    return clks * 1000000000.0/XPAR_AXI_TIMER_MCU_CLOCK_FREQ_HZ;
+}
+
 #endif
 
 #include "src.h"
@@ -141,14 +168,6 @@ int anomaly_detector_sw(unsigned char *src, unsigned char *dst, unsigned input_n
     return 0;
 }
 
-#ifdef PROFILING
-/* profiling function */
-float get_elapsed_time_ns(u64 clks)
-{
-    return clks * 1000000000.0/XPAR_AXI_TIMER_MCU_CLOCK_FREQ_HZ;
-}
-#endif
-
 /* dump data to the console */
 void dump_data(const char* label, unsigned char* data, unsigned sample_count, unsigned feature_count, unsigned print_hex, unsigned print_bin)
 {
@@ -196,8 +215,8 @@ void dump_data(const char* label, unsigned char* data, unsigned sample_count, un
 int main(int argc, char** argv)
 {
 #ifdef PROFILING
-    unsigned calibration_time = 0;
-    u32 sw_elapsed = 0, hw_elapsed = 0, cache_elapsed = 0;
+    u64 calibration_time = 0;
+    u64 sw_elapsed = 0, hw_elapsed = 0, cache_elapsed = 0;
 #endif
 
     int status;
@@ -222,6 +241,11 @@ int main(int argc, char** argv)
     	print("ERROR: Timer counter initialization failed \r\n");
     	return status;
     }
+
+	XTmrCtr_SetOptions(&TimerCounterInst, TIMER_CNTR_0,
+				XTC_AUTO_RELOAD_OPTION |
+				XTC_CASCADE_MODE_OPTION);
+
     print("INFO: Timer counter initialized\r\n");
 #endif
 
@@ -231,11 +255,12 @@ int main(int argc, char** argv)
 
     /* calibration */
 #ifdef PROFILING
-    XTmrCtr_Start(&TimerCounterInst, TIMER_CNTR_0);
-    sleep(3);
-    XTmrCtr_Stop(&TimerCounterInst, TIMER_CNTR_0);
-    calibration_time = XTmrCtr_GetValue(&TimerCounterInst, TIMER_CNTR_0);
-    PRINTF("INFO: Time calibration for three seconds: %u clk, %f ns\n\r", calibration_time, get_elapsed_time_ns(calibration_time));
+    unsigned sleep_s = 1;
+    start_64b_counter();
+    sleep(sleep_s);
+    stop_64b_counter();
+    calibration_time = get_64b_counter_value();
+    PRINTF("INFO: Time calibration for %u seconds: %llu clk, %f ns\n\r", sleep_s, calibration_time, get_elapsed_time_ns(calibration_time));
 #endif
 
     /* initialize memory */
@@ -263,12 +288,12 @@ int main(int argc, char** argv)
     PRINTF("INFO: Start SW accelerator\n\r");
 #endif
 #ifdef PROFILING
-    XTmrCtr_Start(&TimerCounterInst, TIMER_CNTR_0);
+    start_64b_counter();
 #endif
     anomaly_detector_sw(src_mem, gld_mem, INPUT_N_ELEMENTS, OUTPUT_N_ELEMENTS);
 #ifdef PROFILING
-    XTmrCtr_Stop(&TimerCounterInst, TIMER_CNTR_0);
-    sw_elapsed = XTmrCtr_GetValue(&TimerCounterInst, TIMER_CNTR_0);
+    stop_64b_counter();
+    sw_elapsed = get_64b_counter_value();
 #endif
 #if 0
 #ifdef __DEBUG__
@@ -287,14 +312,14 @@ int main(int argc, char** argv)
 #endif
 
 #ifdef PROFILING
-    XTmrCtr_Start(&TimerCounterInst, TIMER_CNTR_0);
+    start_64b_counter();
 #endif
     Xil_DCacheFlushRange((UINTPTR)src_mem, INPUT_N_ELEMENTS * sizeof(unsigned char));
     Xil_DCacheFlushRange((UINTPTR)dst_mem, OUTPUT_N_ELEMENTS * sizeof(unsigned char));
     Xil_DCacheFlushRange((UINTPTR)gld_mem, OUTPUT_N_ELEMENTS * sizeof(unsigned char));
 #ifdef PROFILING
-    XTmrCtr_Stop(&TimerCounterInst, TIMER_CNTR_0);
-    cache_elapsed = XTmrCtr_GetValue(&TimerCounterInst, TIMER_CNTR_0);
+    stop_64b_counter();
+    cache_elapsed = get_64b_counter_value();
 #endif
 
     for (unsigned j = 0; j < ITERATION_FACTOR; j++) {
@@ -306,7 +331,7 @@ int main(int argc, char** argv)
 
     		/* Configure the accelerator */
 #ifdef PROFILING
-    		XTmrCtr_Start(&TimerCounterInst, TIMER_CNTR_0);
+    		start_64b_counter();
 #endif
     		XAnomaly_detector_axi_Set_in_V(&do_anomaly_detector, (unsigned)src_mem_i);
     		XAnomaly_detector_axi_Set_out_V(&do_anomaly_detector, (unsigned)dst_mem_i);
@@ -320,8 +345,8 @@ int main(int argc, char** argv)
     		/* get error status */
     		//hw_flags = XAnomaly_detector_axi_Get_return(&do_anomaly_detector);
 #ifdef PROFILING
-    		XTmrCtr_Stop(&TimerCounterInst, TIMER_CNTR_0);
-    		hw_elapsed += XTmrCtr_GetValue(&TimerCounterInst, TIMER_CNTR_0);
+    		stop_64b_counter();
+    		hw_elapsed += get_64b_counter_value();
 #endif
 
     		src_mem_i += src_FEATURE_COUNT;
@@ -330,12 +355,12 @@ int main(int argc, char** argv)
     }
 
 #ifdef PROFILING
-    XTmrCtr_Start(&TimerCounterInst, TIMER_CNTR_0);
+    start_64b_counter();
 #endif
     Xil_DCacheFlushRange((UINTPTR)dst_mem, OUTPUT_N_ELEMENTS * sizeof(unsigned char));
 #ifdef PROFILING
-    XTmrCtr_Stop(&TimerCounterInst, TIMER_CNTR_0);
-    cache_elapsed += XTmrCtr_GetValue(&TimerCounterInst, TIMER_CNTR_0);
+    stop_64b_counter();
+    cache_elapsed += get_64b_counter_value();
 #endif
 
     /* ****** VALIDATION ****** */
@@ -349,7 +374,7 @@ int main(int argc, char** argv)
 #endif
 #ifdef PROFILING
     //PRINTF("INFO: Software execution time: %u clk, %u ns\n\r", sw_elapsed, get_elapsed_time_ns(sw_elapsed));
-    PRINTF("INFO: Accelerator execution time: %u clk, %f ns\n\r", hw_elapsed, get_elapsed_time_ns(hw_elapsed));
+    PRINTF("INFO: Accelerator execution time: %llu clk, %f ns\n\r", hw_elapsed, get_elapsed_time_ns(hw_elapsed));
     //PRINTF("INFO: Cache flush time: %u clk, %u ns\n\r", cache_elapsed, get_elapsed_time_ns(cache_elapsed));
     //PRINTF("INFO: Accelerator/software speedup (the sofware is fake so this does not count...): %.2f X\n\r", (sw_elapsed >= (hw_elapsed+cache_elapsed))?(sw_elapsed/(hw_elapsed+cache_elapsed)):-((hw_elapsed+cache_elapsed)/sw_elapsed));
 #endif
