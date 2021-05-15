@@ -98,11 +98,11 @@ apply_bd_automation -rule xilinx.com:bd_rule:axi4 -config { \
 
 # Add accelerator and connect s-axi interface
 create_bd_cell -type ip -vlnv xilinx.com:hls:$top_module:1.0 $top_module
-apply_bd_automation -rule xilinx.com:bd_rule:axi4 -config { Clk_master {/mig_7series_0/ui_clk (83 MHz)} Clk_slave {Auto} Clk_xbar {/mig_7series_0/ui_clk (83 MHz)} Master {/microblaze_mcu (Periph)} Slave {/$acc_axi/s_axi_CTRL_BUS} intc_ip {/microblaze_mcu_axi_periph} master_apm {0}}  [get_bd_intf_pins $acc_axi/s_axi_CTRL_BUS]
+apply_bd_automation -rule xilinx.com:bd_rule:axi4 -config { Clk_master {/mig_7series_0/ui_clk (83 MHz)} Clk_slave {Auto} Clk_xbar {/mig_7series_0/ui_clk (83 MHz)} Master {/microblaze_mcu (Periph)} Slave {/$acc\_axi/s_axi_CTRL_BUS} intc_ip {/microblaze_mcu_axi_periph} master_apm {0}}  [get_bd_intf_pins $acc\_axi/s_axi_CTRL_BUS]
 
 # Connect m-axi interfaces
-apply_bd_automation -rule xilinx.com:bd_rule:axi4 -config { Clk_master {/mig_7series_0/ui_clk (83 MHz)} Clk_slave {/mig_7series_0/ui_clk (83 MHz)} Clk_xbar {/mig_7series_0/ui_clk (83 MHz)} Master {/$acc_axi/m_axi_IN_BUS} Slave {/mig_7series_0/S_AXI} intc_ip {/axi_smc} master_apm {0}}  [get_bd_intf_pins $acc_axi/m_axi_IN_BUS]
-apply_bd_automation -rule xilinx.com:bd_rule:axi4 -config { Clk_master {/mig_7series_0/ui_clk (83 MHz)} Clk_slave {/mig_7series_0/ui_clk (83 MHz)} Clk_xbar {/mig_7series_0/ui_clk (83 MHz)} Master {/$acc_axi/m_axi_OUT_BUS} Slave {/mig_7series_0/S_AXI} intc_ip {/axi_smc} master_apm {0}}  [get_bd_intf_pins $acc_axi/m_axi_OUT_BUS]
+apply_bd_automation -rule xilinx.com:bd_rule:axi4 -config { Clk_master {/mig_7series_0/ui_clk (83 MHz)} Clk_slave {/mig_7series_0/ui_clk (83 MHz)} Clk_xbar {/mig_7series_0/ui_clk (83 MHz)} Master {/$acc\_axi/m_axi_IN_BUS} Slave {/mig_7series_0/S_AXI} intc_ip {/axi_smc} master_apm {0}}  [get_bd_intf_pins $acc\_axi/m_axi_IN_BUS]
+apply_bd_automation -rule xilinx.com:bd_rule:axi4 -config { Clk_master {/mig_7series_0/ui_clk (83 MHz)} Clk_slave {/mig_7series_0/ui_clk (83 MHz)} Clk_xbar {/mig_7series_0/ui_clk (83 MHz)} Master {/$acc\_axi/m_axi_OUT_BUS} Slave {/mig_7series_0/S_AXI} intc_ip {/axi_smc} master_apm {0}}  [get_bd_intf_pins $acc\_axi/m_axi_OUT_BUS]
 
 # Reset
 apply_bd_automation -rule xilinx.com:bd_rule:board -config { Board_Interface {reset ( System Reset ) } Manual_Source {Auto}}  [get_bd_pins clk_wizard/reset]
